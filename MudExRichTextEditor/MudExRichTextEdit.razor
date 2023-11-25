@@ -1,0 +1,10 @@
+﻿@* @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseComponent<MudExRichTextEdit> *@
+
+@inject IJSRuntime JsRuntime
+<div @ref="@ToolBar">
+    @ToolbarContent
+</div>
+
+<div @ref="@QuillElement">
+    @EditorContent
+</div>
