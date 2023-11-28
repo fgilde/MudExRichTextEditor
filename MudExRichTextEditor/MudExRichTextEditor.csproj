@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="BlazorJS" Version="2.1.4" />
-    <!--<PackageReference Include="MudBlazor.Extensions" Version="1.7.77" />-->
+    <PackageReference Include="MudBlazor.Extensions" Version="1.7.77" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
   </ItemGroup>
 

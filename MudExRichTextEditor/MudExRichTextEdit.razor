@@ -1,10 +1,78 @@
-﻿@* @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseComponent<MudExRichTextEdit> *@
-
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@* @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseComponent<MudExRichTextEdit> *@
 @inject IJSRuntime JsRuntime
+
+<style>
+    .ql-font-opensans {
+        font-family: 'Open Sans', sans-serif;
+    }
+</style>
+
 <div @ref="@ToolBar">
-    @ToolbarContent
+    @if(ToolbarContent != null) {
+        @ToolbarContent
+    }else
+    {
+        @DefaultToolBar
+    }
 </div>
 
 <div @ref="@QuillElement">
     @EditorContent
 </div>
+
+@code{
+    void DefaultToolBar(RenderTreeBuilder __builder) {
+        <select class="ql-header">
+            <option value="1"></option>
+            <option value="2"></option>
+            <option selected=""></option>
+        </select>
+        <button class="ql-blockquote"></button>
+        <button class="ql-code-block"></button>
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-script" value="super"></button>
+        <button class="ql-direction" value="rtl"></button>
+        <button class="ql-video"></button>
+        <button class="ql-formula"></button>
+        <button class="ql-divider"></button>
+
+        <span class="ql-formats">
+            <MudBlazor.Extensions.Components.MudExFontSelect Virtualize="true" MultiSelection="false" WithGoogleLatinFonts="false"></MudBlazor.Extensions.Components.MudExFontSelect>
+            <select class="ql-size">
+                <option value="small"></option>
+                <option selected=""></option>
+                <option value="large"></option>
+                <option value="huge"></option>
+            </select>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+            <button class="ql-strike"></button>
+        </span>
+        <span class="ql-formats">
+            <select class="ql-color"></select>
+            <select class="ql-background"></select>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+            <button class="ql-indent" value="-1"></button>
+            <button class="ql-indent" value="+1"></button>
+            <select class="ql-align">
+                <option selected=""></option>
+                <option value="center"></option>
+                <option value="right"></option>
+                <option value="justify"></option>
+            </select>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-link"></button>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-image"></button>
+        </span>
+    }
+}

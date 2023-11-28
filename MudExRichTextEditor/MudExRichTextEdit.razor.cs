@@ -25,6 +25,7 @@ public partial class MudExRichTextEdit
 		await JsRuntime.LoadFilesAsync(
 			"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
 			"./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
+            "./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css",            
 			"./_content/MudExRichTextEditor/lib/quill/quill.js",
 			"./_content/MudExRichTextEditor/BlazorQuill.js",
 			"./_content/MudExRichTextEditor/quill-blot-formatter.min.js"

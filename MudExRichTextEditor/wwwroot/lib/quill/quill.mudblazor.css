@@ -1,0 +1,211 @@
+﻿:root {
+    --quill-font-family: var(--mud-typography-font-family, Helvetica, Arial, sans-serif);
+    --quill-font-size: var(--mud-typography-body1-font-size, 13px);
+    --quill-text-color: var(--mud-palette-text-primary, #000);
+    --quill-bg-color: var(--mud-palette-background, #fff);
+    --quill-toolbar-bg-color: var(--mud-palette-background-grey, #fff);
+    --quill-border-color: var(--mud-palette-grey-darken-2, #ccc);
+    --quill-placeholder-color: rgba(0, 0, 0, 0.6); /* Keine MudBlazor-Variable vorhanden */
+    --quill-primary-color: var(--mud-palette-primary, #06c);
+    --quill-error-color: var(--mud-palette-error, #e60000);
+    --quill-success-color: var(--mud-palette-success, #008a00);
+    --quill-info-color: var(--mud-palette-info, #06c);
+    --quill-warning-color: var(--mud-palette-warning, #f90);
+    --quill-light-bg-color: var(--mud-palette-grey-lighten-3, #f0f0f0);
+    --quill-dark-bg-color: var(--mud-palette-grey-darken-3, #23241f);
+    --quill-dark-text-color: var(--mud-palette-text-primary, #444);
+}
+
+.ql-picker-options {
+    background-color: var(--quill-bg-color) !important;
+}
+
+.ql-container {
+    box-sizing: border-box;
+    font-family: var(--quill-font-family);
+    font-size: var(--quill-font-size);
+    height: 100%;
+    margin: 0px;
+    position: relative;
+    color: var(--quill-text-color);
+    background-color: var(--quill-bg-color);
+    border: 1px solid var(--quill-border-color);
+}
+
+.ql-toolbar {
+    background-color: var(--quill-toolbar-bg-color);
+    border-color: var(--quill-border-color);
+}
+
+.ql-editor {
+    box-sizing: border-box;
+    line-height: 1.42;
+    height: 100%;
+    outline: none;
+    overflow-y: auto;
+    padding: 12px 15px;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.ql-editor.ql-blank::before {
+    color: var(--quill-placeholder-color);
+    content: attr(data-placeholder);
+    font-style: italic;
+    left: 15px;
+    pointer-events: none;
+    position: absolute;
+    right: 15px;
+}
+
+/* Anpassung der Farben für spezifische Elemente */
+.ql-editor .ql-bg-black {
+    background-color: var(--quill-dark-bg-color);
+}
+
+.ql-editor .ql-bg-red {
+    background-color: var(--quill-error-color);
+}
+
+.ql-editor .ql-bg-green {
+    background-color: var(--quill-success-color);
+}
+
+.ql-editor .ql-bg-blue {
+    background-color: var(--quill-info-color);
+}
+
+.ql-editor .ql-color-white {
+    color: var(--quill-bg-color);
+}
+
+.ql-editor .ql-color-red {
+    color: var(--quill-error-color);
+}
+
+.ql-editor .ql-color-green {
+    color: var(--quill-success-color);
+}
+
+.ql-editor .ql-color-blue {
+    color: var(--quill-info-color);
+}
+
+/* Anpassungen für Tooltips und Buttons */
+.ql-snow.ql-toolbar button:hover,
+.ql-snow.ql-toolbar button:focus,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow.ql-toolbar .ql-picker-label:hover,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active,
+.ql-snow.ql-toolbar .ql-picker-item:hover,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected {
+    color: var(--quill-primary-color);
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button:focus .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill {
+    fill: var(--quill-primary-color);
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button:focus .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke {
+    stroke: var(--quill-primary-color);
+}
+
+/* Anpassungen für Blockquotes, Code und Pre-Elemente */
+.ql-editor blockquote {
+    border-left: 4px solid var(--quill-light-bg-color);
+    padding-left: 16px;
+}
+
+.ql-editor code,
+.ql-editor pre {
+    background-color: var(--quill-light-bg-color);
+}
+
+.ql-editor pre.ql-syntax {
+    background-color: var(--quill-dark-bg-color);
+    color: var(--quill-bg-color);
+}
+
+/* Anpassungen für Links */
+.ql-snow a {
+    color: var(--quill-primary-color);
+}
+
+/* Anpassungen für die Toolbar */
+.ql-toolbar.ql-snow {
+    border: 1px solid var(--quill-border-color);
+    font-family: var(--quill-font-family);
+}
+
+.ql-snow .ql-tooltip {
+    background-color: var(--quill-bg-color);
+    border: 1px solid var(--quill-border-color);
+    color: var(--quill-dark-text-color);
+}
+
+@media (pointer: coarse) {
+    .ql-snow.ql-toolbar button:hover:not(.ql-active),
+    .ql-snow .ql-toolbar button:hover:not(.ql-active) {
+        color: var(--quill-dark-text-color);
+    }
+
+        .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,
+        .ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,
+        .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,
+        .ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill {
+            fill: var(--quill-dark-text-color);
+        }
+
+        .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,
+        .ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,
+        .ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,
+        .ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter {
+            stroke: var(--quill-dark-text-color);
+        }
+}
+
+.ql-snow .ql-stroke {
+    fill: none;
+    stroke: var(--quill-dark-text-color);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+}
+
+.ql-snow .ql-stroke-miter {
+    fill: none;
+    stroke: var(--quill-dark-text-color);
+    stroke-miterlimit: 10;
+    stroke-width: 2;
+}
+
+.ql-snow .ql-fill,
+.ql-snow .ql-stroke.ql-fill {
+    fill: var(--quill-dark-text-color);
+}
+
+.ql-snow .ql-picker {
+    color: var(--quill-dark-text-color);
+    display: inline-block;
+    float: left;
+    font-size: 14px;
+    font-weight: 500;
+    height: 24px;
+    position: relative;
+    vertical-align: middle;
+}

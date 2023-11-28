@@ -1,7 +1,7 @@
 ﻿@page "/"
 
 <div class="card">
-	<div class="card-body">
+	<div class="card-body" style="height:">
 		<h3 class="card-title">Quill with HTML</h3>
 		<MudExRichTextEdit @ref="@QuillHtml">
 			<ToolbarContent>
@@ -63,49 +63,7 @@
 		<h3 class="card-title">Quill native</h3>
 		<MudExRichTextEdit @ref="@QuillNative"
 					 Placeholder="Enter non HTML format like centering...">
-			<ToolbarContent>
-				<span class="ql-formats">
-					<select class="ql-font">
-						<option selected=""></option>
-						<option value="serif"></option>
-						<option value="monospace"></option>
-					</select>
-					<select class="ql-size">
-						<option value="small"></option>
-						<option selected=""></option>
-						<option value="large"></option>
-						<option value="huge"></option>
-					</select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-bold"></button>
-					<button class="ql-italic"></button>
-					<button class="ql-underline"></button>
-					<button class="ql-strike"></button>
-				</span>
-				<span class="ql-formats">
-					<select class="ql-color"></select>
-					<select class="ql-background"></select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-list" value="ordered"></button>
-					<button class="ql-list" value="bullet"></button>
-					<button class="ql-indent" value="-1"></button>
-					<button class="ql-indent" value="+1"></button>
-					<select class="ql-align">
-						<option selected=""></option>
-						<option value="center"></option>
-						<option value="right"></option>
-						<option value="justify"></option>
-					</select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-link"></button>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-image"></button>
-				</span>
-			</ToolbarContent>
+			
 		</MudExRichTextEdit>
 	</div>
 	<div class="card-footer">
