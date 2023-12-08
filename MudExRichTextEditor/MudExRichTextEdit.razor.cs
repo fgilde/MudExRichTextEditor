@@ -36,13 +36,6 @@ public partial class MudExRichTextEdit
 	}
 
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender && _initialized)		
-			await CreateEditor();		
-	}
-	
-
 	public async Task<string> GetHTML()
 		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.root.innerHTML, QuillElement);
 	public async Task<string> GetText()
