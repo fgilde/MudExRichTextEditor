@@ -1,21 +1,23 @@
 ﻿(function () {
 	window.QuillFunctions = {
-		create: function (
-			quillElement, toolBar, readOnly,
-			placeholder, theme, debugLevel) {
+		create: function (opt) {
 				
 			var options = {
-				debug: debugLevel,
+				debug: opt.debugLevel,
 				modules: {
-					toolbar: toolBar
+					toolbar: opt.toolBar
 				},
-				placeholder: placeholder,
-				readOnly: readOnly,
-				theme: theme
+				placeholder: opt.placeholder,
+				readOnly: opt.readOnly,
+				theme: opt.theme
 			};
 
-			new Quill(quillElement, options);
-		},
+			var quill = new Quill(opt.quillElement, options);
+			quill.on('text-change', function (delta, oldDelta, source) {
+				var html = quill.root.innerHTML;
+                opt.dotnet.invokeMethodAsync('OnContentChanged', html, source);
+            });
+        },
 		
 		insertImage: function (quillElement, imageURL) {
 			var Delta = Quill.import('delta');

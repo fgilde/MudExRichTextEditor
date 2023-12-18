@@ -1,51 +1,56 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
-@* @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseComponent<MudExRichTextEdit> *@
+@using SharpCompress.Common
+@inherits MudBlazor.Extensions.Components.Base.MudExBaseComponent<MudExRichTextEdit>
 @inject IJSRuntime JsRuntime
 
-<style>
-    .ql-font-opensans {
-        font-family: 'Open Sans', sans-serif;
-    }
-</style>
 
-<div @ref="@ToolBar">
-    @if(ToolbarContent != null) {
-        @ToolbarContent
-    }else
+<div class="@ClassStr()" style="@StyleStr()">
+    <div @ref="@ToolBar">
+        <div class="@ToolBarClassStr()">
+            @RenderToolbar()
+        </div>
+    </div>
+
+    @if (ShouldHideToolbar())
     {
-        @DefaultToolBar
+        @* Extra border *@
+        <div></div>
     }
+
+    <div @ref="@QuillElement">
+        @if (EditorContent != null)
+        {
+            @EditorContent
+        }
+        else if (!string.IsNullOrWhiteSpace(Value) && !_initialized)
+        {
+            @((MarkupString)Value)
+        }
+    </div>
 </div>
 
-<div @ref="@QuillElement">
-    @EditorContent
-</div>
+@code {
 
-@code{
-    void DefaultToolBar(RenderTreeBuilder __builder) {
+    private RenderFragment RenderToolbar()
+    {
+        @if (ToolbarContent != null)
+        {
+            return @ToolbarContent;
+        }
+        return @DefaultToolBar;
+    }
+
+    private void DefaultToolBar(RenderTreeBuilder __builder)
+    {
         <select class="ql-header">
+            <option selected=""></option>
             <option value="1"></option>
             <option value="2"></option>
-            <option selected=""></option>
+            <option value="3"></option>
+            <option value="4"></option>
+            <option value="5"></option>
         </select>
-        <button class="ql-blockquote"></button>
-        <button class="ql-code-block"></button>
-        <button class="ql-script" value="sub"></button>
-        <button class="ql-script" value="super"></button>
-        <button class="ql-direction" value="rtl"></button>
-        <button class="ql-video"></button>
-        <button class="ql-formula"></button>
-        <button class="ql-divider"></button>
 
-        <span class="ql-formats">
-            <MudBlazor.Extensions.Components.MudExFontSelect Virtualize="true" MultiSelection="false" WithGoogleLatinFonts="false"></MudBlazor.Extensions.Components.MudExFontSelect>
-            <select class="ql-size">
-                <option value="small"></option>
-                <option selected=""></option>
-                <option value="large"></option>
-                <option value="huge"></option>
-            </select>
-        </span>
         <span class="ql-formats">
             <button class="ql-bold"></button>
             <button class="ql-italic"></button>
@@ -68,11 +73,21 @@
                 <option value="justify"></option>
             </select>
         </span>
+
+        <button class="ql-blockquote"></button>
+        <button class="ql-code-block"></button>
+        <button class="ql-script" value="sub"></button>
+        <button class="ql-script" value="super"></button>
+        <button class="ql-video"></button>
+        <button class="ql-formula"></button>
+        <button class="ql-divider"></button>
+
         <span class="ql-formats">
             <button class="ql-link"></button>
         </span>
         <span class="ql-formats">
             <button class="ql-image"></button>
+            @*<button ><MudIcon Icon="@MudBlazor.Icons.Material.Filled.Image"></MudIcon></button>*@
         </span>
     }
 }

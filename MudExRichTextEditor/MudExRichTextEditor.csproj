@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Authors>Enrico Rossini</Authors>
-    <Company>Enrico Rossini - PureSourceCode</Company>    
+    <Authors>Florian Gilde</Authors>
     <PackageIconUrl />
-    <RepositoryUrl>https://github.com/erossini/BlazorQuillComponent</RepositoryUrl>
-    <PackageTags>blazor, blazor-component, blazor-webassembly, blazor-server</PackageTags>
-    <Description>Blazor Quill Component is a custom reusable control that allows us to easily consume Quill and place multiple instances of it on a single page in our Blazor application.</Description>
+    <RepositoryUrl>https://github.com/fgilde/MudExRichTextEditor</RepositoryUrl>
+    <PackageTags>blazor, blazor-component, blazor-webassembly, blazor-server, quill, MudBlazor, MudBlazor.Extensions</PackageTags>
+    <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://www.puresourcecode.com/dotnet/blazor/create-a-blazor-component-for-quill/</PackageProjectUrl>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <Version>0.0.1</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AssemblyVersion>0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="BlazorJS" Version="2.1.4" />
-    <PackageReference Include="MudBlazor.Extensions" Version="1.7.77" />
+    <PackageReference Include="MudBlazor.Extensions" Version="1.7.78" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.16" />
   </ItemGroup>
 
@@ -30,6 +30,10 @@
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
     <!--<None Include="wwwroot\avatar.jpeg">
       <Pack>True</Pack>

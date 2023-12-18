@@ -1,180 +1,19 @@
 ﻿@page "/"
 
-<div class="card">
-	<div class="card-body" style="height:">
-		<h3 class="card-title">Quill with HTML</h3>
-		<MudExRichTextEdit @ref="@QuillHtml">
-			<ToolbarContent>
-				<select class="ql-header">
-					<option selected=""></option>
-					<option value="1"></option>
-					<option value="2"></option>
-					<option value="3"></option>
-					<option value="4"></option>
-					<option value="5"></option>
-				</select>
-				<span class="ql-formats">
-					<button class="ql-bold"></button>
-					<button class="ql-italic"></button>
-					<button class="ql-underline"></button>
-					<button class="ql-strike"></button>
-				</span>
-				<span class="ql-formats">
-					<select class="ql-color"></select>
-					<select class="ql-background"></select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-list" value="ordered"></button>
-					<button class="ql-list" value="bullet"></button>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-link"></button>
-				</span>
-			</ToolbarContent>
-			<EditorContent>
-				<h4>This Toolbar works with HTML</h4>
-				<a href="https://www.puresourcecode.com/">
-					PureSourceCode
-				</a>
-			</EditorContent>
-		</MudExRichTextEdit>
-	</div>
-	<div class="card-footer">
-		<button class="btn btn-primary"
-				@onclick="GetHTML">
-			Get HTML
-		</button>
-        <button class="btn btn-primary"
-                @onclick="InsertImage">
-            Insert Image
-        </button>
-		<div style="height: 5px; width: 100%;"></div>
-		<div style="width: 100%; background-color: #dcdcdc;">
-			@((MarkupString)QuillHTMLContent)
-			@QuillHTMLContent
-		</div>
-	</div>
-</div>
+<MudCheckBox Label="Read only" @bind-Checked="_readOnly" />
 
-<div style="height: 25px; width: 100%;"></div>
-
-<div class="card">
-	<div class="card-body">
-		<h3 class="card-title">Quill native</h3>
-		<MudExRichTextEdit @ref="@QuillNative"
-					 Placeholder="Enter non HTML format like centering...">
-			
-		</MudExRichTextEdit>
-	</div>
-	<div class="card-footer">
-		<button class="btn btn-primary"
-				@onclick="GetContent">
-			Get Content
-		</button>
-		<button class="btn btn-primary"
-				@onclick="LoadContent">
-			Load Content
-		</button>
-		@*<button class="btn btn-primary"
-				@onclick="InsertImage">
-			Insert Image
-		</button>*@
-		<div>
-			@QuillContent
-		</div>
-	</div>
-</div>
-
-<div style="height: 25px; width: 100%;"></div>
-
-<div class="card">
-	<div class="card-body">
-		<h3 class="card-title">Quill read-only</h3>
-		<MudExRichTextEdit @ref="@QuillReadOnly"
-					 ReadOnly="true"
-					 Theme="bubble"
-					 DebugLevel="log">
-			<ToolbarContent>
-				<select class="ql-header">
-					<option selected=""></option>
-					<option value="1"></option>
-					<option value="2"></option>
-					<option value="3"></option>
-					<option value="4"></option>
-					<option value="5"></option>
-				</select>
-				<span class="ql-formats">
-					<button class="ql-bold"></button>
-					<button class="ql-italic"></button>
-					<button class="ql-underline"></button>
-					<button class="ql-strike"></button>
-				</span>
-				<span class="ql-formats">
-					<select class="ql-color"></select>
-					<select class="ql-background"></select>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-list" value="ordered"></button>
-					<button class="ql-list" value="bullet"></button>
-				</span>
-				<span class="ql-formats">
-					<button class="ql-link"></button>
-				</span>
-			</ToolbarContent>
-			<EditorContent>
-				@((MarkupString)@QuillReadOnlyContent)
-			</EditorContent>
-		</MudExRichTextEdit>
-	</div>
-	<div class="card-footer">
-		<button class="btn btn-info"
-				@onclick="ToggleQuillEditor">
-			Toggle Editor
-		</button>
-	</div>
-</div>
+<MudExRichTextEdit @ref="@Editor"
+                   ReadOnly="@_readOnly"
+                   Height="444"
+                   Class="m-2"
+                   Placeholder="Write your shit right here">
+			 
+</MudExRichTextEdit>
 
 @code {
 	// Quill editor
-	MudExRichTextEdit QuillHtml;
-	string QuillHTMLContent;
+    bool _readOnly = false;
+	MudExRichTextEdit Editor;
+	
 
-	// use Quill native
-    MudExRichTextEdit QuillNative;
-	string QuillContent;
-
-	// Quill editor read-only with the option to enable an online editor
-    MudExRichTextEdit QuillReadOnly;
-	string QuillReadOnlyContent = @"<span><b>Read Only</b> <u>Content</u></span>";
-	bool mode = false;
-
-	public async void GetHTML()
-	{
-		QuillHTMLContent = await this.QuillHtml.GetHTML();
-		StateHasChanged();
-	}
-
-	public async void GetContent()
-	{
-		QuillContent = await this.QuillNative.GetContent();
-		StateHasChanged();
-	}
-
-	public async void LoadContent()
-	{
-		await this.QuillNative.LoadContent(QuillContent);
-		StateHasChanged();
-	}
-
-	async Task ToggleQuillEditor()
-	{
-		mode = !mode;
-		await this.QuillReadOnly.EnableEditor(mode);
-	}
-
-    public async void InsertImage()
-    {
-		await this.QuillHtml.InsertImage("https://fastly.picsum.photos/id/10/536/354.jpg?hmac=kO85F5HngzCkq8HzSPkMbqkCH6xfCjH5z0kmdNCnBI8");
-		StateHasChanged();
-    }
 }

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -14,16 +16,9 @@ namespace MudExRichTextEditor
 
         internal static ValueTask<object> Create(
 			IJSRuntime jsRuntime,
-			ElementReference quillElement,
-			ElementReference toolbar,
-			bool readOnly,
-			string placeholder,
-			string theme,
-			string debugLevel)
+			object options)
 		{
-			return jsRuntime.InvokeAsync<object>(Fn(nameof(Create)),
-				quillElement, toolbar, readOnly,
-				placeholder, theme, debugLevel);
+			return jsRuntime.InvokeAsync<object>(Fn(nameof(Create)), options);
 		}
 
 		internal static ValueTask<object> InsertImage(
@@ -36,4 +31,23 @@ namespace MudExRichTextEditor
 				quillElement, imageURL);
 		}
 	}
+
+    public enum QuillTheme
+    {
+		[Description("snow")]
+        Snow,
+		[Description("bubble")]
+        Bubble
+    }
+
+	public enum QuillDebugLevel {
+		[Description("error")]
+        Error,
+		[Description("warn")]
+        Warn,
+		[Description("log")]
+        Log,
+		[Description("info")]
+        Info
+    }
 }

@@ -16,6 +16,18 @@
     --quill-dark-text-color: var(--mud-palette-text-primary, #444);
 }
 
+.ql-font-opensans {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.ql-tb-hidden {
+    visibility: hidden;
+}
+
+.ql-tooltip {
+    z-index: 1100;
+}
+
 .ql-picker-options {
     background-color: var(--quill-bg-color) !important;
 }
@@ -37,6 +49,10 @@
     border-color: var(--quill-border-color);
 }
 
+.ql-toolbar:has(> div.ql-tb-hidden) {
+    display: none;
+}
+
 .ql-editor {
     box-sizing: border-box;
     line-height: 1.42;
@@ -51,48 +67,48 @@
     word-wrap: break-word;
 }
 
-.ql-editor.ql-blank::before {
-    color: var(--quill-placeholder-color);
-    content: attr(data-placeholder);
-    font-style: italic;
-    left: 15px;
-    pointer-events: none;
-    position: absolute;
-    right: 15px;
-}
+    .ql-editor.ql-blank::before {
+        color: var(--quill-placeholder-color);
+        content: attr(data-placeholder);
+        font-style: italic;
+        left: 15px;
+        pointer-events: none;
+        position: absolute;
+        right: 15px;
+    }
 
-/* Anpassung der Farben für spezifische Elemente */
-.ql-editor .ql-bg-black {
-    background-color: var(--quill-dark-bg-color);
-}
+    /* Anpassung der Farben für spezifische Elemente */
+    .ql-editor .ql-bg-black {
+        background-color: var(--quill-dark-bg-color);
+    }
 
-.ql-editor .ql-bg-red {
-    background-color: var(--quill-error-color);
-}
+    .ql-editor .ql-bg-red {
+        background-color: var(--quill-error-color);
+    }
 
-.ql-editor .ql-bg-green {
-    background-color: var(--quill-success-color);
-}
+    .ql-editor .ql-bg-green {
+        background-color: var(--quill-success-color);
+    }
 
-.ql-editor .ql-bg-blue {
-    background-color: var(--quill-info-color);
-}
+    .ql-editor .ql-bg-blue {
+        background-color: var(--quill-info-color);
+    }
 
-.ql-editor .ql-color-white {
-    color: var(--quill-bg-color);
-}
+    .ql-editor .ql-color-white {
+        color: var(--quill-bg-color);
+    }
 
-.ql-editor .ql-color-red {
-    color: var(--quill-error-color);
-}
+    .ql-editor .ql-color-red {
+        color: var(--quill-error-color);
+    }
 
-.ql-editor .ql-color-green {
-    color: var(--quill-success-color);
-}
+    .ql-editor .ql-color-green {
+        color: var(--quill-success-color);
+    }
 
-.ql-editor .ql-color-blue {
-    color: var(--quill-info-color);
-}
+    .ql-editor .ql-color-blue {
+        color: var(--quill-info-color);
+    }
 
 /* Anpassungen für Tooltips und Buttons */
 .ql-snow.ql-toolbar button:hover,
@@ -105,25 +121,25 @@
     color: var(--quill-primary-color);
 }
 
-.ql-snow.ql-toolbar button:hover .ql-fill,
-.ql-snow.ql-toolbar button:focus .ql-fill,
-.ql-snow.ql-toolbar button.ql-active .ql-fill,
-.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,
-.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,
-.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,
-.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill {
-    fill: var(--quill-primary-color);
-}
+    .ql-snow.ql-toolbar button:hover .ql-fill,
+    .ql-snow.ql-toolbar button:focus .ql-fill,
+    .ql-snow.ql-toolbar button.ql-active .ql-fill,
+    .ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,
+    .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,
+    .ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,
+    .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill {
+        fill: var(--quill-primary-color);
+    }
 
-.ql-snow.ql-toolbar button:hover .ql-stroke,
-.ql-snow.ql-toolbar button:focus .ql-stroke,
-.ql-snow.ql-toolbar button.ql-active .ql-stroke,
-.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
-.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
-.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,
-.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke {
-    stroke: var(--quill-primary-color);
-}
+    .ql-snow.ql-toolbar button:hover .ql-stroke,
+    .ql-snow.ql-toolbar button:focus .ql-stroke,
+    .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+    .ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
+    .ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+    .ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,
+    .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke {
+        stroke: var(--quill-primary-color);
+    }
 
 /* Anpassungen für Blockquotes, Code und Pre-Elemente */
 .ql-editor blockquote {
@@ -136,10 +152,10 @@
     background-color: var(--quill-light-bg-color);
 }
 
-.ql-editor pre.ql-syntax {
-    background-color: var(--quill-dark-bg-color);
-    color: var(--quill-bg-color);
-}
+    .ql-editor pre.ql-syntax {
+        background-color: var(--quill-dark-bg-color);
+        color: var(--quill-bg-color);
+    }
 
 /* Anpassungen für Links */
 .ql-snow a {
