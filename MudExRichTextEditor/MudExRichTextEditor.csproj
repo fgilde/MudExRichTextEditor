@@ -5,14 +5,14 @@
     <Authors>Florian Gilde</Authors>
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/fgilde/MudExRichTextEditor</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/fgilde/MudExRichTextEditor</PackageProjectUrl>
     <PackageTags>blazor, blazor-component, blazor-webassembly, blazor-server, quill, MudBlazor, MudBlazor.Extensions</PackageTags>
     <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://www.puresourcecode.com/dotnet/blazor/create-a-blazor-component-for-quill/</PackageProjectUrl>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>0.0.0</AssemblyVersion>
+    <AssemblyVersion>0.0.2</AssemblyVersion>
   </PropertyGroup>
 
   

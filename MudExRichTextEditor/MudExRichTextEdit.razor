@@ -1,8 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
 @using SharpCompress.Common
-@inherits MudBlazor.Extensions.Components.Base.MudExBaseComponent<MudExRichTextEdit>
+@inherits MudBlazor.Extensions.Components.Base.MudExBaseFormComponent<MudExRichTextEdit, string, string>
 @inject IJSRuntime JsRuntime
-
 
 <div class="@ClassStr()" style="@StyleStr()">
     <div @ref="@ToolBar">
@@ -11,34 +10,26 @@
         </div>
     </div>
 
-    @if (ShouldHideToolbar())
-    {
-        @* Extra border *@
-        <div></div>
-    }
-
-    <div @ref="@QuillElement">
-        @if (EditorContent != null)
-        {
-            @EditorContent
-        }
-        else if (!string.IsNullOrWhiteSpace(Value) && !_initialized)
-        {
-            @((MarkupString)Value)
-        }
-    </div>
+    <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: 0;" Required="@Required">
+        <InputContent>
+            <div style="@EditorStyleStr()" @ref="@QuillElement">
+                @if (EditorContent != null)
+                {
+                    @EditorContent
+                }
+                else if (!string.IsNullOrWhiteSpace(Value) && !_initialized)
+                {
+                    @((MarkupString)Value)
+                }
+            </div>
+        </InputContent>
+    </MudInputControl>
 </div>
+
 
 @code {
 
-    private RenderFragment RenderToolbar()
-    {
-        @if (ToolbarContent != null)
-        {
-            return @ToolbarContent;
-        }
-        return @DefaultToolBar;
-    }
+    private RenderFragment RenderToolbar() => ToolbarContent ?? @DefaultToolBar;
 
     private void DefaultToolBar(RenderTreeBuilder __builder)
     {

@@ -16,7 +16,7 @@ public partial class MudExRichTextEdit
     private bool _initialized = false;
     private bool _readOnly = false;
     private DotNetObjectReference<MudExRichTextEdit> _dotnet;
-    private string _value;
+    
     internal ElementReference QuillElement;
     internal ElementReference ToolBar;
 
@@ -25,6 +25,11 @@ public partial class MudExRichTextEdit
     #region Parameters
 
     public bool ValueHasChanged { get; private set; }
+
+    /// <summary>
+    /// If true, the editor will update the value on every change event otherwise on blur only.
+    /// </summary>
+    [Parameter] public bool UpdateValueOnChange { get; set; }
 
     [Parameter] public bool HideToolbarWhenReadOnly { get; set; } = true;
     [Parameter] public MudExSize<double>? Height { get; set; }
@@ -46,6 +51,7 @@ public partial class MudExRichTextEdit
         }
     }
 
+    [Parameter] public bool EnableResize { get; set; }
     [Parameter] public string Placeholder { get; set; } = "Insert text here...";
     [Parameter] public QuillTheme Theme { get; set; } = QuillTheme.Snow;
     [Parameter] public QuillDebugLevel DebugLevel { get; set; } = QuillDebugLevel.Warn;
@@ -98,10 +104,23 @@ public partial class MudExRichTextEdit
     public void OnContentChanged(string content, string source)
     {
         ValueHasChanged = true;
-        SetValueBackingField(content);
+        if(UpdateValueOnChange)
+            SetValueBackingField(content);
     }
 
-	public async Task LoadContent(string content)
+    [JSInvokable]
+    public void OnBlur(string content, string source)
+    {
+        if (!UpdateValueOnChange)
+            SetValueBackingField(content);
+    }
+
+    [JSInvokable]
+    public void OnFocus(string content, string source)
+    {
+    }
+
+    public async Task LoadContent(string content)
 	{
 		await JsRuntime.DInvokeVoidAsync((window, quillElement, content) =>
 		{
@@ -127,6 +146,8 @@ public partial class MudExRichTextEdit
 
     private bool ShouldHideToolbar() => HideToolbarWhenReadOnly && ReadOnly && Theme == QuillTheme.Snow;
 
+    protected override bool HasValue(string value) => !string.IsNullOrEmpty(value);
+
     private object JsOptions()
     {
         return new
@@ -143,8 +164,9 @@ public partial class MudExRichTextEdit
 
     private string StyleStr()
     {
+        var toolbarHeight = ShouldHideToolbar() ? "0px" : "42px";
         return MudExStyleBuilder.Default
-            .WithHeight(Height, Height is not null)
+            //.WithHeight($"calc({Height} - {toolbarHeight});", Height is not null)
             .AddRaw(Style)
             .Build();
     }
@@ -160,6 +182,18 @@ public partial class MudExRichTextEdit
     {
         return MudExCssBuilder.Default
             .AddClass("ql-tb-hidden", ShouldHideToolbar())
+            .Build();
+    }
+
+    private string EditorStyleStr()
+    {
+        var toolbarHeight = ShouldHideToolbar() ? "0px" : "42px";
+
+        return MudExStyleBuilder.Default
+            .WithHeight($"calc({Height} - {toolbarHeight});", Height is not null)
+            .WithResize("vertical", EnableResize)
+            .WithOverflow("scroll", EnableResize)
+            .WithMinHeight("50px", EnableResize)
             .Build();
     }
 }
