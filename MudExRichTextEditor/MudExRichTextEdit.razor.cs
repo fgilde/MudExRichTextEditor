@@ -17,6 +17,7 @@ public partial class MudExRichTextEdit
     #region Fields
 
     private int _toolBarHeight = 42;
+    private string _initialContent;
     private bool _initialized = false;
     private bool _readOnly = false;
 
@@ -25,32 +26,30 @@ public partial class MudExRichTextEdit
     internal ElementReference ToolBar;
 
     #endregion
-    
+
     #region Parameters
 
     public bool ValueHasChanged { get; private set; }
 
     /// <summary>
-    /// If true, the editor will update the value on every change event otherwise on blur only.
+    /// If true, the editor will update the value on immediately while typing otherwise on blur only.
     /// </summary>
-    [Parameter] public bool UpdateValueOnChange { get; set; }
+    [Parameter] public bool Immediate { get; set; }
 
     [Parameter] public bool HideToolbarWhenReadOnly { get; set; } = true;
     [Parameter] public MudExSize<double>? Height { get; set; }
     [Parameter] public RenderFragment ToolbarContent { get; set; }
     [Parameter] public RenderFragment EditorContent { get; set; }
 
-    [Parameter] public bool ReadOnly
+    [Parameter]
+    public bool ReadOnly
     {
         get => _readOnly;
         set
         {
-            if(value == _readOnly) return;
+            if (value == _readOnly) return;
             if (_initialized)
-            {
                 _ = EnableEditor(!value);
-            }
-
             _readOnly = value;
         }
     }
@@ -70,44 +69,54 @@ public partial class MudExRichTextEdit
         set
         {
             if (value == _value) return;
-            if (_initialized)
-                _ = LoadContent(value);
             SetValueBackingField(value);
+            if (_initialized)
+                _ = SetHtml(value);
         }
     }
 
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
     #endregion
-	
-	
-	public async Task<string> GetHtml()
-		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.root.innerHTML, ElementReference);
-	public async Task<string> GetText()
-		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.getText(), ElementReference);
-	public async Task<string> GetContent()
-		=> await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement.__quill.getContents()), ElementReference);
-	public async Task EnableEditor(bool mode) 
-		=> await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement.__quill.enable(mode), ElementReference, mode);
 
-	[JSInvokable]
-    public void OnHeightChanged(int height)
+
+    public async Task<string> GetHtml()
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.root.innerHTML, ElementReference);
+    public async Task<string> SetHtml(string html)
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement, html) => quillElement.__quill.root.innerHTML = html, ElementReference, html);
+    public async Task<string> GetText()
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.getText(), ElementReference);
+    public async Task<string> GetContent()
+        => await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement.__quill.getContents()), ElementReference);
+    public async Task EnableEditor(bool mode)
+        => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement.__quill.enable(mode), ElementReference, mode);
+
+    protected override Task OnInitializedAsync()
+    {
+        if (!_initialized && EditorContent == null && !string.IsNullOrWhiteSpace(Value))
+            _initialContent = Value;
+        return base.OnInitializedAsync();
+    }
+    
+    
+    [JSInvokable]
+    public void OnHeightChanged(double height)
     {
         _height = height + (ShouldHideToolbar() ? 0 : _toolBarHeight);
-    }	
-    
+    }
+
     [JSInvokable]
     public void OnContentChanged(string content, string source)
     {
         ValueHasChanged = true;
-        if(UpdateValueOnChange)
+        if (Immediate)
             SetValueBackingField(content);
     }
 
     [JSInvokable]
     public void OnBlur(string content, string source)
     {
-        if (!UpdateValueOnChange)
+        if (!Immediate)
             SetValueBackingField(content);
     }
 
@@ -117,17 +126,17 @@ public partial class MudExRichTextEdit
     }
 
     public async Task LoadContent(string content)
-	{
-		await JsRuntime.DInvokeVoidAsync((window, quillElement, content) =>
-		{
-			var parsedContent = window.JSON.parse(content);
-			quillElement.__quill.setContents(parsedContent, "api");
-		}, ElementReference, content);
-	}
+    {
+        await JsRuntime.DInvokeVoidAsync((window, quillElement, content) =>
+        {
+            var parsedContent = window.JSON.parse(content);
+            quillElement.__quill.setContents(parsedContent, "api");
+        }, ElementReference, content);
+    }
 
 
-	//public async Task InsertImage(string imageUrl) => await Quill.InsertImage(JsRuntime, ElementReference, imageUrl);
-	public async Task InsertImage(string imageUrl) => await JsReference.InvokeAsync<object>(nameof(InsertImage).ToLower(true), imageUrl);
+    //public async Task InsertImage(string imageUrl) => await Quill.InsertImage(JsRuntime, ElementReference, imageUrl);
+    public async Task InsertImage(string imageUrl) => await JsReference.InvokeAsync<object>(nameof(InsertImage).ToLower(true), imageUrl);
 
     private void SetValueBackingField(string value)
     {
@@ -163,6 +172,8 @@ public partial class MudExRichTextEdit
         );
         await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
         await base.ImportModuleAndCreateJsAsync();
+        if(EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
+            await SetHtml(_initialContent);
         _initialized = true;
     }
 
@@ -180,8 +191,8 @@ public partial class MudExRichTextEdit
         return MudExCssBuilder.Default
             .AddClass(Class)
             .Build();
-    }    
-    
+    }
+
     private string ToolBarClassStr()
     {
         return MudExCssBuilder.Default

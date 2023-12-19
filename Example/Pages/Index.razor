@@ -1,22 +1,39 @@
 ﻿@page "/"
 
 <MudCheckBox Label="Read only" @bind-Checked="_readOnly" />
+<MudCheckBox Label="Update Value on change" @bind-Checked="_updateValueOnChange" />
+
+<MudButton OnClick="@(() => { _value = "<b>MoIn</b>"; StateHasChanged(); })">Set Value to Moin</MudButton>
 
 
 <MudExRichTextEdit @ref="@Editor"
                    ReadOnly="@_readOnly"
-                   Height="200"
+                   Immediate="@_updateValueOnChange"
+                   Height="400"
                    EnableResize="true"
                    Class="m-2"
+                   @bind-Value="@_value"
                    Placeholder="Write your shit right here">
 			 
 </MudExRichTextEdit>
 
+<textarea class="m-2" style="width: 100%; height: 400px;" readonly="readonly">@_value</textarea>
 
 @code {
-	// Quill editor
-    bool _readOnly = false;
-	MudExRichTextEdit Editor;
 	
+    bool _readOnly = false;
+    bool _updateValueOnChange = false;
+    string _value = "<b>This</b> initial value will change in 2 seconds";
+	MudExRichTextEdit Editor;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(2000);
+            _value = "<b>This is the new value now </b> <a href=\"https://www.mudex.org\">mudex.org</a>";
+            StateHasChanged();
+        }
+    }
 
 }
