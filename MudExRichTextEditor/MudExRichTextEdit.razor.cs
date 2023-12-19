@@ -81,15 +81,20 @@ public partial class MudExRichTextEdit
 
 
     public async Task<string> GetHtml()
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.root.innerHTML, ElementReference);
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.root?.innerHTML, ElementReference);
     public async Task<string> SetHtml(string html)
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement, html) => quillElement.__quill.root.innerHTML = html, ElementReference, html);
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement, html) =>
+        {
+            if(quillElement?.__quill?.root)
+                return quillElement.__quill.root.innerHTML = html;
+            return null;
+        }, ElementReference, html);
     public async Task<string> GetText()
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.getText(), ElementReference);
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.getText(), ElementReference);
     public async Task<string> GetContent()
-        => await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement.__quill.getContents()), ElementReference);
+        => await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement?.__quill?.getContents()), ElementReference);
     public async Task EnableEditor(bool mode)
-        => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement.__quill.enable(mode), ElementReference, mode);
+        => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement?.__quill?.enable(mode), ElementReference, mode);
 
     protected override Task OnInitializedAsync()
     {

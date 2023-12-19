@@ -29,15 +29,17 @@
 
     private void DefaultToolBar(RenderTreeBuilder __builder)
     {
-        <select class="ql-header">
-            <option selected=""></option>
-            <option value="1"></option>
-            <option value="2"></option>
-            <option value="3"></option>
-            <option value="4"></option>
-            <option value="5"></option>
-        </select>
-
+        <span class="ql-formats">
+            <select class="ql-header">
+                <option selected=""></option>
+                <option value="1"></option>
+                <option value="2"></option>
+                <option value="3"></option>
+                <option value="4"></option>
+                <option value="5"></option>
+                <option value="6"></option>
+            </select>
+        </span>
         <span class="ql-formats">
             <button class="ql-bold"></button>
             <button class="ql-italic"></button>
@@ -60,21 +62,16 @@
                 <option value="justify"></option>
             </select>
         </span>
-
-        <button class="ql-blockquote"></button>
-        <button class="ql-code-block"></button>
-        <button class="ql-script" value="sub"></button>
-        <button class="ql-script" value="super"></button>
-        <button class="ql-video"></button>
-        <button class="ql-formula"></button>
-        <button class="ql-divider"></button>
-
+        <span class="ql-formats">
+            <button class="ql-blockquote"></button>
+            <button class="ql-code-block"></button>
+        </span>
         <span class="ql-formats">
             <button class="ql-link"></button>
-        </span>
-        <span class="ql-formats">
             <button class="ql-image"></button>
+            <button class="ql-video"></button>
             @*<button ><MudIcon Icon="@MudBlazor.Icons.Material.Filled.Image"></MudIcon></button>*@
         </span>
+
     }
 }
