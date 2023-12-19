@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
 @using SharpCompress.Common
-@inherits MudBlazor.Extensions.Components.Base.MudExBaseFormComponent<MudExRichTextEdit, string, string>
+@inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseFormComponent<MudExRichTextEdit, string, string>
 @inject IJSRuntime JsRuntime
 
 <div class="@ClassStr()" style="@StyleStr()">
@@ -12,7 +12,7 @@
 
     <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: 0;" Required="@Required">
         <InputContent>
-            <div style="@EditorStyleStr()" @ref="@QuillElement">
+            <div style="@EditorStyleStr()" @ref="@ElementReference">
                 @if (EditorContent != null)
                 {
                     @EditorContent

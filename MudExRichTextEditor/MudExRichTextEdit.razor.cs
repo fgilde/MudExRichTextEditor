@@ -6,7 +6,9 @@ using Microsoft.JSInterop;
 using MudBlazor;
 using MudBlazor.Extensions.Core;
 using MudBlazor.Extensions.Helper;
+using MudExRichTextEditor.Types;
 using Nextended.Core.Helper;
+using Nextended.Core.Extensions;
 
 namespace MudExRichTextEditor;
 
@@ -14,15 +16,16 @@ public partial class MudExRichTextEdit
 {
     #region Fields
 
+    private int _toolBarHeight = 42;
     private bool _initialized = false;
     private bool _readOnly = false;
-    private DotNetObjectReference<MudExRichTextEdit> _dotnet;
-    
-    internal ElementReference QuillElement;
+
+    private MudExSize<double>? _height;
+    //internal ElementReference QuillElement;
     internal ElementReference ToolBar;
 
     #endregion
-
+    
     #region Parameters
 
     public bool ValueHasChanged { get; private set; }
@@ -77,34 +80,23 @@ public partial class MudExRichTextEdit
 
     #endregion
 	
-    protected override async Task OnInitializedAsync()
-	{
-		_dotnet = DotNetObjectReference.Create(this);
-		//await JsRuntime.InvokeVoidAsync("eval", "BlazorJS.isLoaded = function() { return false; }");
-		await JsRuntime.LoadFilesAsync(
-			"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
-			"./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
-            "./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css",            
-			"./_content/MudExRichTextEditor/lib/quill/quill.js",
-			"./_content/MudExRichTextEditor/BlazorQuill.js",
-			"./_content/MudExRichTextEditor/quill-blot-formatter.min.js"
-		);
-
-		await JsRuntime.WaitForNamespaceAsync(Quill.Namespace, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
-		await base.OnInitializedAsync();
-		await CreateEditor();
-	}
 	
 	public async Task<string> GetHtml()
-		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.root.innerHTML, QuillElement);
+		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.root.innerHTML, ElementReference);
 	public async Task<string> GetText()
-		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.getText(), QuillElement);
+		=> await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement.__quill.getText(), ElementReference);
 	public async Task<string> GetContent()
-		=> await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement.__quill.getContents()), QuillElement);
+		=> await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement.__quill.getContents()), ElementReference);
 	public async Task EnableEditor(bool mode) 
-		=> await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement.__quill.enable(mode), QuillElement, mode);
+		=> await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement.__quill.enable(mode), ElementReference, mode);
 
 	[JSInvokable]
+    public void OnHeightChanged(int height)
+    {
+        _height = height + (ShouldHideToolbar() ? 0 : _toolBarHeight);
+    }	
+    
+    [JSInvokable]
     public void OnContentChanged(string content, string source)
     {
         ValueHasChanged = true;
@@ -130,23 +122,18 @@ public partial class MudExRichTextEdit
 		{
 			var parsedContent = window.JSON.parse(content);
 			quillElement.__quill.setContents(parsedContent, "api");
-		}, QuillElement, content);
+		}, ElementReference, content);
 	}
 
 
-	public async Task InsertImage(string imageUrl) => await Quill.InsertImage(JsRuntime, QuillElement, imageUrl);
+	//public async Task InsertImage(string imageUrl) => await Quill.InsertImage(JsRuntime, ElementReference, imageUrl);
+	public async Task InsertImage(string imageUrl) => await JsReference.InvokeAsync<object>(nameof(InsertImage).ToLower(true), imageUrl);
 
     private void SetValueBackingField(string value)
     {
         _value = value;
         ValueChanged.InvokeAsync(value);
     }
-
-    private async Task CreateEditor()
-	{
-        await Quill.Create(JsRuntime, JsOptions());
-		_initialized = true;
-	}
 
     private bool ShouldHideToolbar() => HideToolbarWhenReadOnly && ReadOnly && Theme == QuillTheme.Snow;
 
@@ -156,21 +143,34 @@ public partial class MudExRichTextEdit
     {
         return new
         {
-            QuillElement,
+            QuillElement = ElementReference,
             ToolBar,
             ReadOnly,
             Placeholder = TryLocalize(Placeholder),
             Theme = Theme.ToDescriptionString(),
-            DebugLevel = DebugLevel.ToDescriptionString(),
-            Dotnet = _dotnet
+            DebugLevel = DebugLevel.ToDescriptionString()
         };
     }
 
+    public override async Task ImportModuleAndCreateJsAsync()
+    {
+        await JsRuntime.LoadFilesAsync(
+            "./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
+            "./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
+            "./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css",
+            "./_content/MudExRichTextEditor/lib/quill/quill.js",
+            "./_content/MudExRichTextEditor/quill-blot-formatter.min.js"
+        );
+        await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
+        await base.ImportModuleAndCreateJsAsync();
+        _initialized = true;
+    }
+
+    public override object[] GetJsArguments() => new[] { ElementReference, CreateDotNetObjectReference(), JsOptions() };
+
     private string StyleStr()
     {
-        var toolbarHeight = ShouldHideToolbar() ? "0px" : "42px";
         return MudExStyleBuilder.Default
-            //.WithHeight($"calc({Height} - {toolbarHeight});", Height is not null)
             .AddRaw(Style)
             .Build();
     }
@@ -191,10 +191,9 @@ public partial class MudExRichTextEdit
 
     private string EditorStyleStr()
     {
-        var toolbarHeight = ShouldHideToolbar() ? "0px" : "42px";
-
+        var toolbarHeight = ShouldHideToolbar() ? "0px" : $"{_toolBarHeight}px";
         return MudExStyleBuilder.Default
-            .WithHeight($"calc({Height} - {toolbarHeight});", Height is not null)
+            .WithHeight($"calc({_height ?? Height} - {toolbarHeight});", Height is not null)
             .WithResize("vertical", EnableResize)
             .WithOverflow("scroll", EnableResize)
             .WithBackgroundColor(BackgroundColor ?? MudExColor.Surface, BackgroundColor.HasValue)
