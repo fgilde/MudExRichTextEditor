@@ -109,7 +109,7 @@ public partial class MudExRichTextEdit
     public void OnContentChanged(string content, string source)
     {
         ValueHasChanged = true;
-        if (Immediate)
+        if (Immediate || (content.IsNullOrWhiteSpace() && !_value.IsNullOrWhiteSpace() ) || (!content.IsNullOrWhiteSpace() && _value.IsNullOrWhiteSpace()))
             SetValueBackingField(content);
     }
 
