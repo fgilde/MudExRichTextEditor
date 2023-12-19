@@ -110,7 +110,7 @@ public partial class MudExRichTextEdit
     {
         ValueHasChanged = true;
         if (Immediate || (content.IsNullOrWhiteSpace() && !_value.IsNullOrWhiteSpace() ) || (!content.IsNullOrWhiteSpace() && _value.IsNullOrWhiteSpace()))
-            SetValueBackingField(content);
+            SetValueBackingField(content); 
     }
 
     [JSInvokable]
@@ -140,6 +140,7 @@ public partial class MudExRichTextEdit
 
     private void SetValueBackingField(string value)
     {
+        // TODO: Maybe not when readonly?
         _value = value;
         ValueChanged.InvokeAsync(value);
     }
