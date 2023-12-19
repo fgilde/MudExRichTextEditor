@@ -24,6 +24,20 @@
                 } else if (range !== null && oldRange === null)
                     opt.dotnet.invokeMethodAsync('OnFocus', html, source);
             });
+
+            var adjustTooltipPosition = function () {
+                var tooltip = document.querySelector('.ql-tooltip');
+                if (tooltip) {
+                    var leftVal = parseInt(window.getComputedStyle(tooltip).left, 10);
+                    if (leftVal < 0) {
+                        tooltip.style.left = '0px';
+                    }
+                }
+            }
+
+            window.addEventListener('resize', adjustTooltipPosition);
+            setInterval(adjustTooltipPosition, 500);
+
         },
 
         insertImage: function (quillElement, imageURL) {
@@ -42,3 +56,34 @@
         }
     };
 })();
+
+
+class MudExRichTextEdit {
+    elementRef;
+    options;
+    dotnet;
+    canvas;
+    _canvasContainer;
+    _previewControl;
+    color;
+    _el;
+
+    constructor(elementRef, canvasContainer, dotNet, options) {
+        debugger;
+        this.elementRef = elementRef;
+        // this.elementRef.onclick = this._onClick.bind(this);
+        this._canvasContainer = canvasContainer;
+        this.dotnet = dotNet;
+        this.setOptions(options);
+    }
+    
+    dispose() {
+        document.body.removeEventListener("mousedown", this._onBodyClick.bind(this));
+    }
+}
+
+window.MudExColorBubble = MudExColorBubble;
+
+window.initializeMudExRichTextEdit = function (elementRef, canvasContainer, dotnet, options) {
+    return new MudExRichTextEdit(elementRef, canvasContainer, dotnet, options);
+}

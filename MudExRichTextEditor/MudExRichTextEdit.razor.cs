@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using MudBlazor;
 using MudBlazor.Extensions.Core;
 using MudBlazor.Extensions.Helper;
 using Nextended.Core.Helper;
@@ -55,6 +56,9 @@ public partial class MudExRichTextEdit
     [Parameter] public string Placeholder { get; set; } = "Insert text here...";
     [Parameter] public QuillTheme Theme { get; set; } = QuillTheme.Snow;
     [Parameter] public QuillDebugLevel DebugLevel { get; set; } = QuillDebugLevel.Warn;
+    [Parameter] public MudExColor? BackgroundColor { get; set; }
+    [Parameter] public MudExColor? ToolBarBackgroundColor { get; set; }
+    [Parameter] public MudExColor? BorderColor { get; set; }
 
     [Parameter]
     public string Value
@@ -193,7 +197,17 @@ public partial class MudExRichTextEdit
             .WithHeight($"calc({Height} - {toolbarHeight});", Height is not null)
             .WithResize("vertical", EnableResize)
             .WithOverflow("scroll", EnableResize)
+            .WithBackgroundColor(BackgroundColor ?? MudExColor.Surface, BackgroundColor.HasValue)
+            .WithBorderColor(BorderColor ?? MudExColor.Surface, BorderColor.HasValue)
             .WithMinHeight("50px", EnableResize)
+            .Build();
+    }
+
+    private string ToolBarStyleStr()
+    {
+        return MudExStyleBuilder.Default
+            .WithBackgroundColor(ToolBarBackgroundColor ?? MudExColor.Surface, ToolBarBackgroundColor.HasValue)
+            .WithBorderColor(BorderColor ?? MudExColor.Surface, BorderColor.HasValue)
             .Build();
     }
 }
