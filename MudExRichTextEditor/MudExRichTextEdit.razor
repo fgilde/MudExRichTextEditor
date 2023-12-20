@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: 0;" Required="@Required">
+    <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: -1px;" Required="@Required">
         <InputContent>
             <div style="@EditorStyleStr()" @ref="@ElementReference">
                 @if (EditorContent != null)
