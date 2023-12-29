@@ -16,6 +16,7 @@ public partial class MudExRichTextEdit
 {
     #region Fields
 
+    private bool _recording;
     private int _toolBarHeight = 42;
     private string _initialContent;
     private bool _initialized = false;
@@ -225,5 +226,16 @@ public partial class MudExRichTextEdit
             .WithBackgroundColor(ToolBarBackgroundColor ?? MudExColor.Surface, ToolBarBackgroundColor.HasValue)
             .WithBorderColor(BorderColor ?? MudExColor.Surface, BorderColor.HasValue)
             .Build();
+    }
+
+    private async Task StartRecording()
+    {
+        _recording = await JsReference.InvokeAsync<bool>("startRecording");
+    }
+
+    private async Task StopRecording()
+    {
+        await JsReference.InvokeVoidAsync("stopRecording");
+        _recording = false;
     }
 }

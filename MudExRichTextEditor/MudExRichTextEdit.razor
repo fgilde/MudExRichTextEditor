@@ -72,6 +72,15 @@
             <button class="ql-video"></button>
             @*<button ><MudIcon Icon="@MudBlazor.Icons.Material.Filled.Image"></MudIcon></button>*@
         </span>
-
+        <span class="ql-formats">
+            @if (_recording)
+            {
+                <button onclick="@StopRecording"><MudIcon Color="Color.Warning" Icon="@Icons.Material.Filled.Stop"></MudIcon></button>
+            }
+            else
+            {
+                <button onclick="@StartRecording"><MudIcon Icon="@Icons.Material.Filled.Mic"></MudIcon></button>
+            }
+        </span>
     }
 }

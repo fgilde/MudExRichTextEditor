@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "PSC.BlazorQuillExample": {
+    "MudExRichTextEditorExample": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
