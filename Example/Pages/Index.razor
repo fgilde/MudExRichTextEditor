@@ -11,20 +11,21 @@
                    Immediate="@_updateValueOnChange"
                    Height="400"
                    EnableResize="true"
+                   Files="@_files"
                    Class="m-2"
                    @bind-Value="@_value"
                    Placeholder="Write your shit right here">
-			 
+
 </MudExRichTextEdit>
 
 <textarea class="m-2" style="width: 100%; height: 400px;" readonly="readonly">@_value</textarea>
 
 @code {
-	
+
     bool _readOnly = false;
     bool _updateValueOnChange = false;
     string _value = "<b>This</b> initial value will change in 2 seconds";
-	MudExRichTextEdit Editor;
+    MudExRichTextEdit Editor;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -32,8 +33,24 @@
         {
             await Task.Delay(2000);
             _value = "<b>This is the new value now </b> <a href=\"https://www.mudex.org\">mudex.org</a>";
+            //_value = "<p>Hi! Here is an image...</p><p><img src=\"https://kittenrescue.org/wp-content/uploads/2017/03/KittenRescue_KittenCareHandbook.jpg\" /></p><p>A Video!</p><p><iframe class=\"ql-video\" frameborder=\"0\" allowfullscreen=\"true\" src=\"https://www.youtube.com/embed/rg6CiPI6h2g\" height=\"196\"width=\"391\"></iframe></p>";
             StateHasChanged();
         }
     }
 
+    private IList<UploadableFile> _files = new List<UploadableFile>()
+    {
+        new UploadableFile()
+        {
+            Url = "https://mudex.azurewebsites.net/sample-data/logo.png",
+            FileName = "logo.png",
+            ContentType = "image/png"
+        },
+        new UploadableFile()
+        {
+            Url = "https://mudex.azurewebsites.net/sample-data/sample.pdf",
+            FileName = "sample.pdf",
+            ContentType = "application/pdf"
+        },
+    };
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.AspNetCore.Components;
@@ -7,8 +8,14 @@ using MudBlazor;
 using MudBlazor.Extensions.Core;
 using MudBlazor.Extensions.Helper;
 using MudExRichTextEditor.Types;
-using Nextended.Core.Helper;
 using Nextended.Core.Extensions;
+using MudBlazor.Extensions.Components;
+using MudBlazor.Extensions;
+using System.Linq;
+using MudBlazor.Extensions.Options;
+
+using MudBlazor.Extensions.Services;
+using Nextended.Blazor.Models;
 
 namespace MudExRichTextEditor;
 
@@ -29,8 +36,6 @@ public partial class MudExRichTextEdit
     #endregion
 
     #region Parameters
-
-    public bool ValueHasChanged { get; private set; }
 
     /// <summary>
     /// If true, the editor will update the value on immediately while typing otherwise on blur only.
@@ -63,6 +68,8 @@ public partial class MudExRichTextEdit
     [Parameter] public MudExColor? ToolBarBackgroundColor { get; set; }
     [Parameter] public MudExColor? BorderColor { get; set; }
 
+    [Parameter] public IList<UploadableFile> Files { get; set; }
+
     [Parameter]
     public string Value
     {
@@ -86,7 +93,7 @@ public partial class MudExRichTextEdit
     public async Task<string> SetHtml(string html)
         => await JsRuntime.DInvokeAsync<string>((_, quillElement, html) =>
         {
-            if(quillElement?.__quill?.root)
+            if (quillElement?.__quill?.root)
                 return quillElement.__quill.root.innerHTML = html;
             return null;
         }, ElementReference, html);
@@ -97,14 +104,16 @@ public partial class MudExRichTextEdit
     public async Task EnableEditor(bool mode)
         => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement?.__quill?.enable(mode), ElementReference, mode);
 
+    public async Task InsertHtmlAsync(string html) => await JsReference.InvokeVoidAsync("insertMarkup", html);
+
     protected override Task OnInitializedAsync()
     {
         if (!_initialized && EditorContent == null && !string.IsNullOrWhiteSpace(Value))
             _initialContent = Value;
         return base.OnInitializedAsync();
     }
-    
-    
+
+
     [JSInvokable]
     public void OnHeightChanged(double height)
     {
@@ -114,9 +123,8 @@ public partial class MudExRichTextEdit
     [JSInvokable]
     public void OnContentChanged(string content, string source)
     {
-        ValueHasChanged = true;
-        if (Immediate || (content.IsNullOrWhiteSpace() && !_value.IsNullOrWhiteSpace() ) || (!content.IsNullOrWhiteSpace() && _value.IsNullOrWhiteSpace()))
-            SetValueBackingField(content); 
+        if (Immediate || (content.IsNullOrWhiteSpace() && !_value.IsNullOrWhiteSpace()) || (!content.IsNullOrWhiteSpace() && _value.IsNullOrWhiteSpace()))
+            SetValueBackingField(content);
     }
 
     [JSInvokable]
@@ -124,6 +132,16 @@ public partial class MudExRichTextEdit
     {
         if (!Immediate)
             SetValueBackingField(content);
+    }
+
+    [JSInvokable]
+    public async Task OnMouseLeave()
+    {
+        if (!Immediate)
+        {
+            var content = await GetHtml();
+            SetValueBackingField(content);
+        }
     }
 
     [JSInvokable]
@@ -147,8 +165,11 @@ public partial class MudExRichTextEdit
     private void SetValueBackingField(string value)
     {
         // TODO: Maybe not when readonly?
-        _value = value;
-        ValueChanged.InvokeAsync(value);
+        if (value != _value)
+        {
+            _value = value;
+            ValueChanged.InvokeAsync(value);
+        }
     }
 
     private bool ShouldHideToolbar() => HideToolbarWhenReadOnly && ReadOnly && Theme == QuillTheme.Snow;
@@ -163,8 +184,8 @@ public partial class MudExRichTextEdit
             ToolBar,
             ReadOnly,
             Placeholder = TryLocalize(Placeholder),
-            Theme = Theme.ToDescriptionString(),
-            DebugLevel = DebugLevel.ToDescriptionString()
+            Theme = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(Theme),
+            DebugLevel = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(DebugLevel)
         };
     }
 
@@ -174,12 +195,16 @@ public partial class MudExRichTextEdit
             "./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
             "./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
             "./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css",
-            "./_content/MudExRichTextEditor/lib/quill/quill.js",
-            "./_content/MudExRichTextEditor/quill-blot-formatter.min.js"
+            "./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js",
+            "./_content/MudExRichTextEditor/lib/quill/quill.js"
+           
         );
         await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
+
+        //await JsRuntime.ImportModuleAsync("https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js");
+
         await base.ImportModuleAndCreateJsAsync();
-        if(EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
+        if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
             await SetHtml(_initialContent);
         _initialized = true;
     }
@@ -238,4 +263,94 @@ public partial class MudExRichTextEdit
         await JsReference.InvokeVoidAsync("stopRecording");
         _recording = false;
     }
+
+    public async Task AttachFilesAsync()
+    {
+        var buttons = new[]
+        {
+            new MudExDialogResultAction()
+            {
+                Label = TryLocalize("Cancel"),
+                Variant = Variant.Text,
+                Result = DialogResult.Cancel()
+            },
+            new MudExDialogResultAction
+            {
+                Label = TryLocalize("Insert selected"),
+                Color = Color.Warning,
+                Variant = Variant.Filled,
+                Result = DialogResult.Ok(false)
+            }.WithCondition<MudExUploadEdit<UploadableFile>>(c => c.SelectedRequests?.Any() == true),
+            new MudExDialogResultAction
+            {
+                Label = TryLocalize("Insert all"),
+                Color = Color.Error,
+                Variant = Variant.Filled,
+                Result = DialogResult.Ok(true)
+            }.WithCondition<MudExUploadEdit<UploadableFile>>(c => c.UploadRequests?.Any() == true)
+        };
+        var parameters = new DialogParameters
+        {
+            { nameof(MudExMessageDialog.Buttons), buttons },
+            { nameof(MudExMessageDialog.Icon), Icons.Material.Filled.FileUpload }
+        };
+        var res = await DialogService.ShowComponentInDialogAsync<MudExUploadEdit<UploadableFile>>(TryLocalize("Insert file"), TryLocalize("Select files to insert"),
+            uploadEdit =>
+            {
+                uploadEdit.MinHeight = 350;
+                uploadEdit.MaxHeight = 350;
+                uploadEdit.LoadFileDataBytesInBackground = false;
+                uploadEdit.AutoLoadFileDataBytes = true;
+                uploadEdit.AllowRename = false;
+                uploadEdit.SelectItemsMode = SelectItemsMode.MultiSelect;
+                uploadEdit.DropZoneClickAction = DropZoneClickAction.UploadFile;
+                uploadEdit.UploadRequests = Files;
+                //uploadEdit.MimeTypes = mimeTypes;
+            }, parameters, options =>
+            {
+                options.Animation = AnimationType.Fade;
+                options.Resizeable = true;
+                options.FullWidth = true;
+                options.FullHeight = true;
+                options.MaxHeight = MaxHeight.Small;
+                options.MaxWidth = MaxWidth.Medium;
+                options.DialogAppearance = MudExAppearance.FromStyle(new
+                {
+                    Border = "1px solid",
+                    BorderColor = Color.Primary,
+                    BorderRadius = 8
+                });
+            });
+        if (!res.DialogResult.Canceled)
+        {
+            var toAttach = (bool)res.DialogResult.Data ? res.Component.UploadRequests : res.Component.SelectedRequests;
+            await AttachFilesAsync(toAttach);
+        }
+    }
+
+    [Inject] public MudExFileService _fileService { get; set; }
+    public async Task AttachFilesAsync(IEnumerable<UploadableFile> files)
+    {
+        foreach (var file in files)
+        {
+            if (string.IsNullOrEmpty(file.Url))
+            {
+                await file.EnsureDataLoadedAsync();
+                file.Url = await DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
+            }
+
+            var markup = MudExFileDisplay.GetFileRenderInfos(Guid.NewGuid().ToFormattedId(), file.Url, file.FileName, file.ContentType, fallBackInIframe:true)
+                .ToHtml();
+            await InsertHtmlAsync(markup);
+        }
+    }
+
+    public Task InsertTableAsync(int rows, int columns)
+    {
+        string tableMarkup = $"<table><tbody>{string.Join("", Enumerable.Range(0, rows).Select(_ => $"<tr>{string.Join("", Enumerable.Range(0, columns).Select(_ => $"<td><p><br></p></td>"))}</tr>"))}</tbody></table>";
+        Console.WriteLine(tableMarkup);
+        return InsertHtmlAsync(tableMarkup);
+    }
+
+    private string _tmpMarkup;
 }

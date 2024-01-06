@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
+@using MudBlazor.Extensions.Core
 @using SharpCompress.Common
 @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseFormComponent<MudExRichTextEdit, string, string>
 @inject IJSRuntime JsRuntime
@@ -22,6 +23,7 @@
     </MudInputControl>
 </div>
 
+@((MarkupString)_tmpMarkup)
 
 @code {
 
@@ -70,17 +72,20 @@
             <button class="ql-link"></button>
             <button class="ql-image"></button>
             <button class="ql-video"></button>
+            <QuillToolButton OnClick="@AttachFilesAsync" Icon="@Icons.Material.Filled.AttachFile" Tooltip="@TryLocalize("Insert file")"></QuillToolButton>
+
             @*<button ><MudIcon Icon="@MudBlazor.Icons.Material.Filled.Image"></MudIcon></button>*@
         </span>
         <span class="ql-formats">
             @if (_recording)
             {
-                <button onclick="@StopRecording"><MudIcon Color="Color.Warning" Icon="@Icons.Material.Filled.Stop"></MudIcon></button>
+                <QuillToolButton OnClick="@StopRecording" Color="@Color.Warning" Icon="@Icons.Material.Filled.Stop" Tooltip="@TryLocalize("Stop recording")"></QuillToolButton>
             }
             else
             {
-                <button onclick="@StartRecording"><MudIcon Icon="@Icons.Material.Filled.Mic"></MudIcon></button>
+                <QuillToolButton OnClick="@StartRecording" Icon="@Icons.Material.Filled.Mic" Tooltip="@TryLocalize("Start recording")"></QuillToolButton>
             }
         </span>
     }
 }
+

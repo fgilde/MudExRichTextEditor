@@ -13,7 +13,7 @@ Features with MudBlazor Theme Support. This compnent also works without a MudBla
 ## What is Quill?
 Quill is a free, [open source](https://github.com/quilljs/quill/) WYSIWYG editor built for the modern web. With its [modular architecture](https://quilljs.com/docs/modules/) and expressive [API](https://quilljs.com/docs/api/), it is completely customizable to fit any need.
 
-![image](https://user-images.githubusercontent.com/9497415/122029542-dbcf1d80-cdc4-11eb-9034-6a57d22daac8.png)
+![image](https://raw.githubusercontent.com/fgilde/MudExRichTextEditor/master/screen_re.png)
 
 
 ## How to use
@@ -41,11 +41,8 @@ And this is enough now you can simply use the component in your pages
 			 
 </MudExRichTextEdit>
 
-@code {
-	// Quill editor
+@code {	
     bool _readOnly = false;
-	MudExRichTextEdit Editor;
-	
-
+	MudExRichTextEdit Editor;	
 }
 ```
