@@ -5,17 +5,18 @@ using BlazorJS;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
-using MudBlazor.Extensions.Core;
-using MudBlazor.Extensions.Helper;
 using MudExRichTextEditor.Types;
 using Nextended.Core.Extensions;
-using MudBlazor.Extensions.Components;
-using MudBlazor.Extensions;
 using System.Linq;
+using MudBlazor.Extensions;
+using MudBlazor.Extensions.Components;
+using MudBlazor.Extensions.Core;
+using MudBlazor.Extensions.Helper;
 using MudBlazor.Extensions.Options;
-
 using MudBlazor.Extensions.Services;
 using Nextended.Blazor.Models;
+using BlazorJS.JsInterop;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace MudExRichTextEditor;
 
@@ -23,12 +24,13 @@ public partial class MudExRichTextEdit
 {
     #region Fields
 
+    private string id;
     private bool _recording;
     private int _toolBarHeight = 42;
     private string _initialContent;
     private bool _initialized = false;
     private bool _readOnly = false;
-
+    
     private MudExSize<double>? _height;
     //internal ElementReference QuillElement;
     internal ElementReference ToolBar;
@@ -70,6 +72,10 @@ public partial class MudExRichTextEdit
 
     [Parameter] public IList<UploadableFile> Files { get; set; }
 
+    [Parameter] public Func<IList<UploadableFile>> OnGetFilesFunc { get; set; }
+    [Parameter] public EventCallback OnBeforeDialogOpen { get; set; }
+    [Parameter] public EventCallback OnDialogClosed { get; set; }
+
     [Parameter]
     public string Value
     {
@@ -108,11 +114,11 @@ public partial class MudExRichTextEdit
 
     protected override Task OnInitializedAsync()
     {
+        id ??= Guid.NewGuid().ToFormattedId();
         if (!_initialized && EditorContent == null && !string.IsNullOrWhiteSpace(Value))
             _initialContent = Value;
         return base.OnInitializedAsync();
     }
-
 
     [JSInvokable]
     public void OnHeightChanged(double height)
@@ -127,9 +133,16 @@ public partial class MudExRichTextEdit
             SetValueBackingField(content);
     }
 
+
+    private async Task OnFocusLeft(PointerEventArgs arg)
+    {
+        await RaiseValueChangeForCurrentValue();
+    }
+
     [JSInvokable]
     public void OnBlur(string content, string source)
     {
+        Console.WriteLine("onblur");
         if (!Immediate)
             SetValueBackingField(content);
     }
@@ -139,9 +152,14 @@ public partial class MudExRichTextEdit
     {
         if (!Immediate)
         {
-            var content = await GetHtml();
-            SetValueBackingField(content);
+            await RaiseValueChangeForCurrentValue();
         }
+    }
+
+    public async Task RaiseValueChangeForCurrentValue()
+    {
+        var content = await GetHtml();
+        SetValueBackingField(content);
     }
 
     [JSInvokable]
@@ -206,6 +224,7 @@ public partial class MudExRichTextEdit
         await base.ImportModuleAndCreateJsAsync();
         if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
             await SetHtml(_initialContent);
+
         _initialized = true;
     }
 
@@ -221,6 +240,8 @@ public partial class MudExRichTextEdit
     private string ClassStr()
     {
         return MudExCssBuilder.Default
+            .AddClass("mudex-richtexteditor")
+            .AddClass($"mudex-richtexteditor-{id}")
             .AddClass(Class)
             .Build();
     }
@@ -266,6 +287,7 @@ public partial class MudExRichTextEdit
 
     public async Task AttachFilesAsync()
     {
+        await OnBeforeDialogOpen.InvokeAsync();
         var buttons = new[]
         {
             new MudExDialogResultAction()
@@ -304,7 +326,7 @@ public partial class MudExRichTextEdit
                 uploadEdit.AllowRename = false;
                 uploadEdit.SelectItemsMode = SelectItemsMode.MultiSelect;
                 uploadEdit.DropZoneClickAction = DropZoneClickAction.UploadFile;
-                uploadEdit.UploadRequests = Files;
+                uploadEdit.UploadRequests = OnGetFilesFunc != null ? OnGetFilesFunc() : Files;
                 //uploadEdit.MimeTypes = mimeTypes;
             }, parameters, options =>
             {
@@ -326,6 +348,7 @@ public partial class MudExRichTextEdit
             var toAttach = (bool)res.DialogResult.Data ? res.Component.UploadRequests : res.Component.SelectedRequests;
             await AttachFilesAsync(toAttach);
         }
+        await OnDialogClosed.InvokeAsync();
     }
 
     [Inject] public MudExFileService _fileService { get; set; }
