@@ -29,6 +29,7 @@ public partial class MudExRichTextEdit
     private int _toolBarHeight = 42;
     private string _initialContent;
     private bool _initialized = false;
+    private bool _sourceLoaded = false;
     private bool _readOnly = false;
     
     private MudExSize<double>? _height;
@@ -220,8 +221,11 @@ public partial class MudExRichTextEdit
         await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
 
         //await JsRuntime.ImportModuleAsync("https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js");
-
+        _sourceLoaded = true;
+        await InvokeAsync(StateHasChanged);
+        
         await base.ImportModuleAndCreateJsAsync();
+        
         if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
             await SetHtml(_initialContent);
 
@@ -375,5 +379,4 @@ public partial class MudExRichTextEdit
         return InsertHtmlAsync(tableMarkup);
     }
 
-    private string _tmpMarkup;
 }

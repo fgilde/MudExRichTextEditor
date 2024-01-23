@@ -1,33 +1,66 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
 @using MudBlazor.Extensions.Core
+@using MudBlazor.Extensions.Helper
 @using SharpCompress.Common
 @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseFormComponent<MudExRichTextEdit, string, string>
 @inject IJSRuntime JsRuntime
 
-<div class="@ClassStr()" style="@StyleStr()">
-    <div style="@ToolBarStyleStr()" @ref="@ToolBar">
-        <div class="@ToolBarClassStr()">
-            @RenderToolbar()
-        </div>
-    </div>
 
-    <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: -1px;" Required="@Required">
-        <InputContent>
-            <div style="@EditorStyleStr()" @ref="@ElementReference">
-                @if (EditorContent != null)
-                {
-                    @EditorContent
-                }
+@if (_sourceLoaded)
+{
+    <div class="@ClassStr()" style="@StyleStr()">
+        <div style="@ToolBarStyleStr()" @ref="@ToolBar">
+            <div class="@ToolBarClassStr()">
+                @RenderToolbar()
             </div>
-        </InputContent>
-    </MudInputControl>
-</div>
+        </div>
 
-@((MarkupString)_tmpMarkup)
+        <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: -1px;" Required="@Required">
+            <InputContent>
+                <div style="@EditorStyleStr()" @ref="@ElementReference">
+                    @if (EditorContent != null)
+                    {
+                        @EditorContent
+                    }
+                </div>
+            </InputContent>
+        </MudInputControl>
+    </div>
+}
+else
+{
+    <div class="m-2 box" style="@MudExStyleBuilder.Default.WithHeight(Height ?? 0, Height.HasValue).WithSkeletonLoadingBorder(3).Build()">
+        <MudToolBar>
+            <MudSkeleton Class="m-1" Style="margin-bottom: 15px !important;" Animation="Animation.Wave" Width="90px" />
+            @SkeletonButtons(4)
+            @SkeletonButtons(2)
+            @SkeletonButtons(5)
+            @SkeletonButtons(2)
+            @SkeletonButtons(4)
+            @SkeletonButtons(1)
+        </MudToolBar>
+
+        <MudSkeleton Class="m-3" Animation="Animation.Wave" />
+        <MudSkeleton Class="m-3" Animation="Animation.Wave" Width="40%" />
+        <MudSkeleton Class="m-3" Animation="Animation.Wave" Width="60%" />
+        <MudSkeleton Class="m-3" Animation="Animation.Wave" />
+
+    </div>
+}
 
 @code {
 
     private RenderFragment RenderToolbar() => ToolbarContent ?? @DefaultToolBar;
+
+    private RenderFragment SkeletonButtons(int count)
+    {
+        return @<p style="display: flex;" class="ml-2">
+            @for (var i = 0; i < count; i++)
+            {
+                <MudSkeleton Class="m-1" Style="margin-right: 2px !important;" SkeletonType="SkeletonType.Circle" Animation="Animation.Wave" Height="24px" Width="24px"/>
+            }
+        </p>;
+    }
 
     private void DefaultToolBar(RenderTreeBuilder __builder)
     {
