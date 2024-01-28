@@ -213,13 +213,15 @@ public partial class MudExRichTextEdit
         await JsRuntime.LoadFilesAsync(
             "./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
             "./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
+            "./_content/MudExRichTextEditor/lib/quill/quill.mention.css",
             "./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css",
             "./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js",
+            //"./_content/MudExRichTextEditor/modules/quill.mention.min.js",
             "./_content/MudExRichTextEditor/lib/quill/quill.js"
-           
         );
         await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
-
+        
+        await JsRuntime.LoadFilesAsync("./_content/MudExRichTextEditor/modules/quill.mention.min.js");
         //await JsRuntime.ImportModuleAsync("https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js");
         _sourceLoaded = true;
         await InvokeAsync(StateHasChanged);
