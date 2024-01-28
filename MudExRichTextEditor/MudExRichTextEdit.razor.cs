@@ -13,10 +13,11 @@ using MudBlazor.Extensions.Components;
 using MudBlazor.Extensions.Core;
 using MudBlazor.Extensions.Helper;
 using MudBlazor.Extensions.Options;
-using MudBlazor.Extensions.Services;
 using Nextended.Blazor.Models;
-using BlazorJS.JsInterop;
 using Microsoft.AspNetCore.Components.Web;
+using MudExRichTextEditor.Extensibility;
+using MudExRichTextEditor.Extensibility.BlotFormatter;
+using MudExRichTextEditor.Extensibility.Mention;
 
 namespace MudExRichTextEditor;
 
@@ -24,6 +25,7 @@ public partial class MudExRichTextEdit
 {
     #region Fields
 
+    private List<object> _jsQuillModuleConfigs = new();
     private string id;
     private bool _recording;
     private int _toolBarHeight = 42;
@@ -31,7 +33,7 @@ public partial class MudExRichTextEdit
     private bool _initialized = false;
     private bool _sourceLoaded = false;
     private bool _readOnly = false;
-    
+
     private MudExSize<double>? _height;
     //internal ElementReference QuillElement;
     internal ElementReference ToolBar;
@@ -39,6 +41,8 @@ public partial class MudExRichTextEdit
     #endregion
 
     #region Parameters
+
+    [Parameter] public IQuillModule[] Modules { get; set; } = { new QuillMentionModule(), new QuillBlotFormatterModule() };
 
     /// <summary>
     /// If true, the editor will update the value on immediately while typing otherwise on blur only.
@@ -168,6 +172,12 @@ public partial class MudExRichTextEdit
     {
     }
 
+    [JSInvokable]
+    public async Task OnCreated()
+    {
+        await Task.WhenAll((Modules ?? Enumerable.Empty<IQuillModule>()).Select(m => m.OnCreatedAsync(JsRuntime, this)));
+    }
+
     public async Task LoadContent(string content)
     {
         await JsRuntime.DInvokeVoidAsync((window, quillElement, content) =>
@@ -204,7 +214,8 @@ public partial class MudExRichTextEdit
             ReadOnly,
             Placeholder = TryLocalize(Placeholder),
             Theme = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(Theme),
-            DebugLevel = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(DebugLevel)
+            DebugLevel = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(DebugLevel),
+            Modules = _jsQuillModuleConfigs,
         };
     }
 
@@ -213,24 +224,41 @@ public partial class MudExRichTextEdit
         await JsRuntime.LoadFilesAsync(
             "./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
             "./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
-            "./_content/MudExRichTextEditor/lib/quill/quill.mention.css",
             "./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css",
-            "./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js",
+            //"./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js",
             "./_content/MudExRichTextEditor/lib/quill/quill.js"
         );
-        
+
         await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
-        await JsRuntime.LoadFilesAsync("./_content/MudExRichTextEditor/modules/quill.mention.min.js");
+        await LoadModules();
         //await JsRuntime.ImportModuleAsync("https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js");
         _sourceLoaded = true;
         await InvokeAsync(StateHasChanged);
-        
+
         await base.ImportModuleAndCreateJsAsync();
-        
+
         if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
             await SetHtml(_initialContent);
 
         _initialized = true;
+    }
+
+    protected virtual async Task LoadModules()
+    {
+        foreach (var quillModule in Modules ?? Enumerable.Empty<IQuillModule>())
+        {
+            await Task.WhenAll(
+                JsRuntime.LoadFilesAsync(quillModule.CssFiles),
+                JsRuntime.LoadFilesAsync(quillModule.JsFiles)
+            );
+            var reference = await quillModule.OnLoadedAsync(JsRuntime, this);
+            _jsQuillModuleConfigs.Add(new
+            {
+                JsReference = reference,
+                JsConfigFunction = quillModule.JsConfigFunction,
+                Options = await quillModule.GetQuillJsCreationConfigAsync(JsRuntime, this)
+            });
+        }
     }
 
     public override object[] GetJsArguments() => new[] { ElementReference, CreateDotNetObjectReference(), JsOptions() };
@@ -356,7 +384,6 @@ public partial class MudExRichTextEdit
         await OnDialogClosed.InvokeAsync();
     }
 
-    [Inject] public MudExFileService _fileService { get; set; }
     public async Task AttachFilesAsync(IEnumerable<UploadableFile> files)
     {
         foreach (var file in files)
@@ -367,7 +394,7 @@ public partial class MudExRichTextEdit
                 file.Url = await DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
             }
 
-            var markup = MudExFileDisplay.GetFileRenderInfos(Guid.NewGuid().ToFormattedId(), file.Url, file.FileName, file.ContentType, fallBackInIframe:true)
+            var markup = MudExFileDisplay.GetFileRenderInfos(Guid.NewGuid().ToFormattedId(), file.Url, file.FileName, file.ContentType, fallBackInIframe: true)
                 .ToHtml();
             await InsertHtmlAsync(markup);
         }
@@ -380,4 +407,9 @@ public partial class MudExRichTextEdit
         return InsertHtmlAsync(tableMarkup);
     }
 
+    public override async ValueTask DisposeAsync()
+    {
+        await Task.WhenAll((Modules ?? Enumerable.Empty<IQuillModule>()).Select(m => m.DisposeAsync().AsTask()));
+        await base.DisposeAsync();
+    }
 }
