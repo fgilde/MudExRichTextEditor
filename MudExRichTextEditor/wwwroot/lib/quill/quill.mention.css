@@ -1,7 +1,7 @@
 ﻿.ql-mention-list-container {
-    background-color: #fff;
+    background-color: var(--mud-palette-background, #fff);
     border: 1px solid #f0f0f0;
-    border-radius: 4px;
+    border-radius: var(--mud-default-borderradius, 4px);
     box-shadow: 0 2px 12px 0 rgba(30,30,30,.08);
     overflow: auto;
     width: 270px;
@@ -9,7 +9,7 @@
 }
 
 .ql-mention-loading {
-    font-size: 16px;
+    font-size: var(--mud-typography-default-size, 16px);
     line-height: 44px;
     padding: 0 20px;
     vertical-align: middle
@@ -24,7 +24,7 @@
 
 .ql-mention-list-item {
     cursor: pointer;
-    font-size: 16px;
+    font-size: var(--mud-typography-default-size, 16px);
     line-height: 44px;
     padding: 0 20px;
     vertical-align: middle
@@ -34,13 +34,15 @@
     cursor: auto
 }
 
-.ql-mention-list-item.selected {
-    background-color: #d3e1eb;
-    text-decoration: none
-}
+    .ql-mention-list-item.selected {
+        color: var(--mud-palette-primary-text);
+        background-color: var(--mud-palette-primary, #d3e1eb);
+        text-decoration: none
+    }
 
 .mention {
-    background-color: #d3e1eb;
+    background-color: var(--mud-palette-primary, #d3e1eb);
+    color: var(--mud-palette-primary-text);
     border-radius: 6px;
     height: 24px;
     margin-right: 2px;
