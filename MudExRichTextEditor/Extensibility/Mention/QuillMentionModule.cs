@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.JSInterop;
 
@@ -33,7 +34,29 @@ public class QuillMentionModule : IQuillModule
     }
 
     [JSInvokable]
+    public async Task<IEnumerable<object>> GetSuggestions(char denotationChar, string searchTerm)
+    {
+        return new[]
+        {
+            new { Id = 1, Value = "Florian Gilde" },
+            new { Id = 2, Value = "Hans Meiser" },
+        };
+    }
+
+    [JSInvokable]
     public virtual Task OnBeforeSelect(object item)
+    {
+        return Task.CompletedTask;
+    }   
+    
+    [JSInvokable]
+    public virtual Task OnMentionHovered(object item)
+    {
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public virtual Task OnMentionClicked(object item)
     {
         return Task.CompletedTask;
     }

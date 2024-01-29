@@ -42,7 +42,7 @@ public partial class MudExRichTextEdit
 
     #region Parameters
 
-    [Parameter] public IQuillModule[] Modules { get; set; } = { new QuillMentionModule(), new QuillBlotFormatterModule() };
+    [Parameter] public IQuillModule[] Modules { get; set; } = { new QuillMentionModule(), new QuillMentionModule(), new QuillBlotFormatterModule() };
 
     /// <summary>
     /// If true, the editor will update the value on immediately while typing otherwise on blur only.

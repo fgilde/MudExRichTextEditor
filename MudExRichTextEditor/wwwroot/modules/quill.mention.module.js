@@ -1,30 +1,21 @@
 ﻿class MentionModule {
-
+    
     constructor(dotnet) {
         this.dotnet = dotnet;
+        window.addEventListener('mention-hovered', this._onMentionHovered = this.onMentionHovered.bind(this));
+        window.addEventListener('mention-clicked', this._onMentionClicked = this.onMentionClicked.bind(this));
+    }
+
+    onMentionHovered(event) {
+        console.log(event);
+        this.dotnet.invokeMethodAsync('OnMentionHovered', event.value);
+    }
+
+    onMentionClicked(event) {
+        this.dotnet.invokeMethodAsync('OnMentionClicked', event.value);
     }
 
     __getMentionConfig(quillOptions, initialConfig, editorElement) {
-        const atValues = [
-            { id: 1, value: "Fredrik Sundqvist" },
-            { id: 2, value: "Patrik Sjölin" }
-        ];
-        const hashValues = [
-            { id: 3, value: "Fredrik Sundqvist 2" },
-            { id: 4, value: "Patrik Sjölin 2" }
-        ];
-
-        window.addEventListener('mention-hovered', (event, a, b) => {
-            var isWithin = BlazorJS.EventHelper.isWithin(event, editorElement);
-            debugger;
-            var x = a;
-            var y = b;
-            if (isWithin) {
-                console.log('hovered: ', event);
-            }
-        }, false);
-        window.addEventListener('mention-clicked', (event) => { console.log('clicked: ', event) }, false);
-
         return {
             mention: {
                 allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
@@ -37,33 +28,17 @@
                     insertItem(item);
                     this.dotnet.invokeMethodAsync('OnAfterSelect', item);
                 },
-                source: (searchTerm, renderList, mentionChar) => {
-                    let values;
-
-                    if (mentionChar === "@") {
-                        values = atValues;
-                    } else {
-                        values = hashValues;
-                    }
-
-                    if (searchTerm.length === 0) {
-                        renderList(values, searchTerm);
-                    } else {
-                        const matches = [];
-                        for (let i = 0; i < values.length; i++)
-                            if (
-                                ~values[i].value.toLowerCase().indexOf(searchTerm.toLowerCase())
-                            )
-                                matches.push(values[i]);
-                        renderList(matches, searchTerm);
-                    }
+                source: async (searchTerm, renderList, mentionChar) => {
+                    const matchedPeople = await this.dotnet.invokeMethodAsync('GetSuggestions', mentionChar, searchTerm);
+                    renderList(matchedPeople);
                 }
             }
         }
     }
 
     dispose() {
-        alert('dispose');
+        window.removeEventListener('mention-hovered', this._onMentionHovered);
+        window.removeEventListener('mention-clicked', this._onMentionClicked);
     }
 }
 
