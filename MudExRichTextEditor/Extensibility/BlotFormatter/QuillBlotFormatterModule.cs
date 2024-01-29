@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 
 namespace MudExRichTextEditor.Extensibility.BlotFormatter;
 
-public class QuillBlotFormatterModule : IQuillModule
+internal class QuillBlotFormatterModule : IQuillModule
 {
     public string[] JsFiles => new[] { "./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js" };
     public string[] CssFiles => Array.Empty<string>();

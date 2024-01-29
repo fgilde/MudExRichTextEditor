@@ -1,13 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.JSInterop;
+using Nextended.Core.Extensions;
 
 namespace MudExRichTextEditor.Extensibility.Mention;
 
-public class QuillMentionModule : IQuillModule
+public class QuillMentionModule<T> : IQuillModule
 {
-    private DotNetObjectReference<QuillMentionModule> _reference;
+    private readonly char[] _denotationChars;
+    private readonly Func<char, string, Task<IEnumerable<T>>> _getItemsFunc;
+    private DotNetObjectReference<QuillMentionModule<T>> _reference;
+
+    public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char denotationChar, params char[] denotationChars)
+    : this(getItemsFunc, new[] { denotationChar }.Concat(denotationChars ?? Array.Empty<char>()).ToArray())
+    { }
+
+    public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char[] denotationChars)
+    {
+        _denotationChars = denotationChars;
+        _getItemsFunc = getItemsFunc;
+    }
+    
+    public Action<T> MentionClicked { get; set; }
+    public Action<T> MentionHovered { get; set; }
+    public Action<T> BeforeMentionSelect { get; set; }
+    public Action<T> AfterMentionSelect { get; set; }
 
     public IJSObjectReference JsReference { get; private set; }
     public IJSObjectReference ModuleReference { get; private set; }
@@ -22,10 +42,18 @@ public class QuillMentionModule : IQuillModule
     public async Task<IJSObjectReference> OnLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
     {
         _reference = DotNetObjectReference.Create(this);
-        var res = await jsRuntime.ImportModuleAndCreateJsAsync("./_content/MudExRichTextEditor/modules/quill.mention.module.js", "initializeMentionModule", _reference);
+        var res = await jsRuntime.ImportModuleAndCreateJsAsync("./_content/MudExRichTextEditor/modules/quill.mention.module.js", "initializeMentionModule", _reference, JsOptions());
         JsReference = res.jsObjectReference;
         ModuleReference = res.moduleReference;
         return JsReference;
+    }
+
+    private object JsOptions()
+    {
+        return new
+        {
+            denotationChars = _denotationChars
+        };
     }
 
     public Task OnCreatedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
@@ -34,37 +62,43 @@ public class QuillMentionModule : IQuillModule
     }
 
     [JSInvokable]
-    public async Task<IEnumerable<object>> GetSuggestions(char denotationChar, string searchTerm)
+    public virtual async Task<IEnumerable<Mention<T>>> GetSuggestions(char denotationChar, string searchTerm)
     {
-        return new[]
+        var items = await _getItemsFunc(denotationChar, searchTerm);
+        return items.Select(x => new Mention<T>
         {
-            new { Id = 1, Value = "Florian Gilde" },
-            new { Id = 2, Value = "Hans Meiser" },
-        };
+            Id = Guid.NewGuid().ToFormattedId(),
+            Value = x.ToString(),
+            Data = x
+        });
     }
 
     [JSInvokable]
-    public virtual Task OnBeforeSelect(object item)
+    public virtual Task OnBeforeSelect(Mention<T> item)
     {
-        return Task.CompletedTask;
-    }   
-    
-    [JSInvokable]
-    public virtual Task OnMentionHovered(object item)
-    {
+        BeforeMentionSelect?.Invoke(item.Data);
         return Task.CompletedTask;
     }
 
     [JSInvokable]
-    public virtual Task OnMentionClicked(object item)
+    public virtual Task OnMentionHovered(Mention<T> item)
     {
+        MentionHovered?.Invoke(item.Data);
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public virtual Task OnMentionClicked(Mention<T> item)
+    {
+        MentionClicked?.Invoke(item.Data);
         return Task.CompletedTask;
     }
 
 
     [JSInvokable]
-    public virtual Task OnAfterSelect(object item)
+    public virtual Task OnAfterSelect(Mention<T> item)
     {
+        AfterMentionSelect?.Invoke(item.Data);
         return Task.CompletedTask;
     }
 

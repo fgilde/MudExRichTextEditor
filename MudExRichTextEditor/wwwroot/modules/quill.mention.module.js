@@ -1,36 +1,45 @@
 ﻿class MentionModule {
-    
-    constructor(dotnet) {
+
+    constructor(dotnet, options) {
+        this.options = options;
         this.dotnet = dotnet;
         window.addEventListener('mention-hovered', this._onMentionHovered = this.onMentionHovered.bind(this));
         window.addEventListener('mention-clicked', this._onMentionClicked = this.onMentionClicked.bind(this));
     }
 
     onMentionHovered(event) {
-        console.log(event);
-        this.dotnet.invokeMethodAsync('OnMentionHovered', event.value);
+        if (event?.value?.__editorId === this.editor.id) { // because maybe we have multiple editors on the same page
+            event.value.data = event.value?.data || JSON.parse(event.value.__dataJson);
+            this.dotnet.invokeMethodAsync('OnMentionHovered', event.value);
+        }
     }
 
     onMentionClicked(event) {
-        this.dotnet.invokeMethodAsync('OnMentionClicked', event.value);
+        if (event?.value?.__editorId === this.editor.id) { // because maybe we have multiple editors on the same page
+            event.value.data = event.value?.data || JSON.parse(event.value.__dataJson);
+            this.dotnet.invokeMethodAsync('OnMentionClicked', event.value);
+        }
     }
 
     __getMentionConfig(quillOptions, initialConfig, editorElement) {
+        this.editor = editorElement;
         return {
             mention: {
                 allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
-                mentionDenotationChars: ["@", "#"],
-                clicked: (item) => {
-                    debugger;
-                },
+                dataAttributes: ['id', 'value', 'denotationChar', 'link', 'target', 'disabled', '__dataJson', '__editorId'],
+                mentionDenotationChars: this.options.denotationChars,
                 onSelect: (item, insertItem) => {
                     this.dotnet.invokeMethodAsync('OnBeforeSelect', item);
                     insertItem(item);
                     this.dotnet.invokeMethodAsync('OnAfterSelect', item);
                 },
                 source: async (searchTerm, renderList, mentionChar) => {
-                    const matchedPeople = await this.dotnet.invokeMethodAsync('GetSuggestions', mentionChar, searchTerm);
-                    renderList(matchedPeople);
+                    renderList((await this.dotnet.invokeMethodAsync('GetSuggestions', mentionChar, searchTerm))
+                        .map((item) => {
+                            item.__editorId = editorElement.id;
+                            item.__dataJson = JSON.stringify(item.data);
+                            return item;
+                        }));
                 }
             }
         }
@@ -44,6 +53,6 @@
 
 window.MentionModule = MentionModule;
 
-export function initializeMentionModule(dotnet) {
-    return new MentionModule(dotnet);
+export function initializeMentionModule(dotnet, options) {
+    return new MentionModule(dotnet, options);
 }

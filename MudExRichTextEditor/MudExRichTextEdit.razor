@@ -16,7 +16,7 @@
 
         <MudInputControl Error="@HasErrors" ErrorText="@GetErrorText()" Style="margin-top: -1px;" Required="@Required">
             <InputContent>
-                <div style="@EditorStyleStr()" @ref="@ElementReference">
+                <div id="@_editorId" style="@EditorStyleStr()" @ref="@ElementReference">
                     @if (EditorContent != null)
                     {
                         @EditorContent

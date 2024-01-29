@@ -25,6 +25,7 @@ public partial class MudExRichTextEdit
 {
     #region Fields
 
+    private string _editorId = $"mud-ex-rich-edit-{Guid.NewGuid().ToFormattedId()}";
     private List<object> _jsQuillModuleConfigs = new();
     private string id;
     private bool _recording;
@@ -41,8 +42,10 @@ public partial class MudExRichTextEdit
     #endregion
 
     #region Parameters
+    
+    private IQuillModule[] _defaultModules = { new QuillBlotFormatterModule() };
 
-    [Parameter] public IQuillModule[] Modules { get; set; } = { new QuillMentionModule(), new QuillMentionModule(), new QuillBlotFormatterModule() };
+    [Parameter] public IQuillModule[] Modules { get; set; }
 
     /// <summary>
     /// If true, the editor will update the value on immediately while typing otherwise on blur only.
@@ -95,6 +98,8 @@ public partial class MudExRichTextEdit
     }
 
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    
+    public IEnumerable<IQuillModule> AllModules => _defaultModules.Concat(Modules ?? Enumerable.Empty<IQuillModule>());
 
     #endregion
 
@@ -175,7 +180,7 @@ public partial class MudExRichTextEdit
     [JSInvokable]
     public async Task OnCreated()
     {
-        await Task.WhenAll((Modules ?? Enumerable.Empty<IQuillModule>()).Select(m => m.OnCreatedAsync(JsRuntime, this)));
+        await Task.WhenAll(AllModules.Select(m => m.OnCreatedAsync(JsRuntime, this)));
     }
 
     public async Task LoadContent(string content)
@@ -245,7 +250,7 @@ public partial class MudExRichTextEdit
 
     protected virtual async Task LoadModules()
     {
-        foreach (var quillModule in Modules ?? Enumerable.Empty<IQuillModule>())
+        foreach (var quillModule in AllModules)
         {
             await Task.WhenAll(
                 JsRuntime.LoadFilesAsync(quillModule.CssFiles),
@@ -409,7 +414,7 @@ public partial class MudExRichTextEdit
 
     public override async ValueTask DisposeAsync()
     {
-        await Task.WhenAll((Modules ?? Enumerable.Empty<IQuillModule>()).Select(m => m.DisposeAsync().AsTask()));
+        await Task.WhenAll(AllModules.Select(m => m.DisposeAsync().AsTask()));
         await base.DisposeAsync();
     }
 }
