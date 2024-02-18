@@ -9,9 +9,11 @@
 <MudCheckBox Label="Update Value on change" @bind-Checked="_updateValueOnChange" />
 
 <MudButton OnClick="@(() => { _value = "<b>MoIn</b>"; StateHasChanged(); })">Set Value to Moin</MudButton>
+<MudButton OnClick="@(() => {ShowMentions(); })">ShowMentions</MudButton>
 
 
 <MudExRichTextEdit
+                    @ref="_editor"
                    Modules="@_modules"
                    ReadOnly="@_readOnly"
                    Immediate="@_updateValueOnChange"
@@ -28,6 +30,7 @@
 
 @code {
 
+    MudExRichTextEdit _editor;
     bool _readOnly;
     bool _updateValueOnChange;
     string _value = "<b>This</b> initial value will change in 2 seconds";
@@ -96,4 +99,11 @@
         public string FullName => $"{FirstName} {LastName}";
         public override string ToString() => FullName;
     }
+
+    private async Task ShowMentions()
+    {
+        var allUsers = await _editor.GetModule<QuillMentionModule<User>>().GetMentionsFromContentAsync();
+        await _js.AlertAsync(JsonConvert.SerializeObject(allUsers.Select(mention => mention.Data)));
+    }
+
 }

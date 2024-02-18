@@ -67,6 +67,7 @@ public class QuillMentionModule<T> : IQuillModule
         var items = await _getItemsFunc(denotationChar, searchTerm);
         return items.Select(x => new Mention<T>
         {
+            DenotationChar = denotationChar,
             Id = Guid.NewGuid().ToFormattedId(),
             Value = x.ToString(),
             Data = x
@@ -113,4 +114,10 @@ public class QuillMentionModule<T> : IQuillModule
         }
         if (ModuleReference != null) await ModuleReference.DisposeAsync();
     }
+
+    /// <summary>
+    /// Returns all mentions from the content
+    /// </summary>
+    public Task<Mention<T>[]> GetMentionsFromContentAsync() 
+        => JsReference.InvokeAsync<Mention<T>[]>("getMentions").AsTask();
 }

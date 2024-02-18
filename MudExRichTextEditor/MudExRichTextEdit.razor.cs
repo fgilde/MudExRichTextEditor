@@ -183,6 +183,8 @@ public partial class MudExRichTextEdit
         await Task.WhenAll(AllModules.Select(m => m.OnCreatedAsync(JsRuntime, this)));
     }
 
+    public T GetModule<T>() where T : IQuillModule => (T)AllModules.FirstOrDefault(m => m is T);
+
     public async Task LoadContent(string content)
     {
         await JsRuntime.DInvokeVoidAsync((window, quillElement, content) =>

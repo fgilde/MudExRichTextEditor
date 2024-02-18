@@ -21,6 +21,21 @@
         }
     }
 
+    getMentions() {
+        //var module = this.editor.__quill.getModule('mention');
+        var contents = this.editor.__quill.getContents();
+        var result = contents.ops.filter(op => op.insert && op.insert.mention).map(op => {
+            var item = op.insert.mention;
+            return {
+                denotationChar: item.denotationChar,
+                id: item.id,
+                value: item.value,
+                data: item.data || JSON.parse(item.__dataJson)
+            };
+        });
+        return result;
+    }
+
     __getMentionConfig(quillOptions, initialConfig, editorElement) {
         this.editor = editorElement;
         return {
