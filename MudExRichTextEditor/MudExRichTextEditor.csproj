@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <Authors>Florian Gilde</Authors>
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/fgilde/MudExRichTextEditor</RepositoryUrl>
@@ -27,7 +27,6 @@
   <ItemGroup>
     <PackageReference Include="BlazorJS" Version="2.1.5" />
     <PackageReference Include="MudBlazor.Extensions" Version="1.7.85" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.27" />
   </ItemGroup>
 
   <ItemGroup>

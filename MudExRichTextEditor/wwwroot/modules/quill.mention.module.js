@@ -53,7 +53,7 @@
                 }
             },
             source: async (searchTerm, renderList, mentionChar) => {
-                if (this.options?.denotationChars?.includes(mentionChar)) {
+                if (this.options?.denotationChars?.includes(mentionChar)) {                    
                     renderList((await this.dotnet.invokeMethodAsync('GetSuggestions', mentionChar, searchTerm))
                         .map((item) => {
                             item.__editorId = editorElement.id;
