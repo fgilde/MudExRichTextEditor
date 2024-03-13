@@ -5,15 +5,12 @@
 @using BlazorJS
 @using Newtonsoft.Json
 
-<MudCheckBox Label="Read only" @bind-Checked="_readOnly" />
-<MudCheckBox Label="Update Value on change" @bind-Checked="_updateValueOnChange" />
+<MudToolBar>
+    <MudCheckBox Label="Read only" @bind-Checked="_readOnly" />
+    <MudCheckBox Label="Update Value on change" @bind-Checked="_updateValueOnChange" />
+</MudToolBar>
 
-<MudButton OnClick="@(() => { _value = "<b>MoIn</b>"; StateHasChanged(); })">Set Value to Moin</MudButton>
-<MudButton OnClick="@(() => {ShowMentions(); })">ShowMentions</MudButton>
-
-
-<MudExRichTextEdit
-                    @ref="_editor"
+<MudExRichTextEdit @ref="_editor"
                    Modules="@_modules"
                    ReadOnly="@_readOnly"
                    Immediate="@_updateValueOnChange"
@@ -26,6 +23,10 @@
 
 </MudExRichTextEdit>
 
+<MudButton OnClick="@(() => { _value = "<b>MoIn</b>"; StateHasChanged(); })">Set Value to Moin</MudButton>
+<MudButton OnClick="@(() => {ShowUserMentions(); })">Show User Mentions</MudButton>
+<MudButton OnClick="@(() => {ShowTagMentions(); })">Show Tag Mentions</MudButton>
+
 <textarea class="m-2" style="width: 100%; height: 400px;" readonly="readonly">@_value</textarea>
 
 @code {
@@ -35,16 +36,21 @@
     bool _updateValueOnChange;
     string _value = "<b>This</b> initial value will change in 2 seconds";
     private IQuillModule[] _modules;
-    [Inject] 
+    [Inject]
     private IJSRuntime _js { get; set; }
 
     protected override void OnInitialized()
     {
         _modules = new IQuillModule[] {
-            new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$').SetProperties(m => m.MentionClicked = UserMentionClicked),
+            new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$').SetProperties(m => m.MentionClicked = UserMentionClicked, m => m.AfterMentionSelect = AfterUserMentionSelect),
             new QuillMentionModule<Tag>((c, s) => Task.FromResult(_tags.Where(tag => tag.Name.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '#').SetProperties(m => m.MentionClicked = TagMentionClicked)
-        };
+    };
         base.OnInitialized();
+    }
+
+    private void AfterUserMentionSelect(User obj)
+    {
+        Console.WriteLine(obj.FullName);
     }
 
     private async void TagMentionClicked(Tag obj)
@@ -102,7 +108,8 @@
         new() { Name = "Another"},
     };
 
-    class Tag     {
+    class Tag
+    {
         public string Id { get; set; }
         public string Name { get; set; }
         public override string ToString() => Name;
@@ -118,10 +125,14 @@
         public override string ToString() => FullName;
     }
 
-    private async Task ShowMentions()
+    private async Task ShowUserMentions()
     {
         var allUsers = await _editor.GetModule<QuillMentionModule<User>>().GetMentionsFromContentAsync();
         await _js.AlertAsync(JsonConvert.SerializeObject(allUsers.Select(mention => mention.Data)));
     }
-
+    private async Task ShowTagMentions()
+    {
+        var allTags = await _editor.GetModule<QuillMentionModule<Tag>>().GetMentionsFromContentAsync();
+        await _js.AlertAsync(JsonConvert.SerializeObject(allTags.Select(mention => mention.Data)));
+    }
 }

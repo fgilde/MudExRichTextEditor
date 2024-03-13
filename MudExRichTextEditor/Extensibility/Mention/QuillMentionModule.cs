@@ -52,7 +52,8 @@ public class QuillMentionModule<T> : IQuillModule
     {
         return new
         {
-            denotationChars = _denotationChars
+            denotationChars = _denotationChars,
+            type = typeof(T).FullName
         };
     }
 

@@ -34,7 +34,6 @@
             opt.modules.forEach(module => {                
                 const owner = module.jsReference || window;
                 const moduleConfig = module.jsConfigFunction && owner[module.jsConfigFunction] ? owner[module.jsConfigFunction](options, opt, opt.quillElement || this.elementRef ) : module.options;
-                debugger;
                 if (moduleConfig) {
                     options.modules = { ...options.modules, ...moduleConfig };
                 }
