@@ -1,0 +1,14 @@
+[
+  {
+    "outputFileName": "wwwroot/js/components/MudExRichTextEdit.min.js",
+    "inputFiles": [
+      "wwwroot/js/components/MudExRichTextEdit.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/modules/quill.mention.module.min.js",
+    "inputFiles": [
+      "wwwroot/modules/quill.mention.module.js"
+    ]
+  }
+]

@@ -40,11 +40,17 @@
 
     protected override void OnInitialized()
     {
-        _modules = new[] {
-            new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$', '#')
-                .SetProperties(m => m.MentionClicked = MentionClicked)
+        _modules = new IQuillModule[] {
+            new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$').SetProperties(m => m.MentionClicked = UserMentionClicked),
+            new QuillMentionModule<Tag>((c, s) => Task.FromResult(_tags.Where(tag => tag.Name.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '#').SetProperties(m => m.MentionClicked = TagMentionClicked)
         };
         base.OnInitialized();
+    }
+
+    private async void TagMentionClicked(Tag obj)
+    {
+        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -59,7 +65,7 @@
 
 
 
-    private async void MentionClicked(User obj)
+    private async void UserMentionClicked(User obj)
     {
         await _js.AlertAsync(JsonConvert.SerializeObject(obj));
     }
@@ -89,6 +95,18 @@
         new() { FirstName = "Baz", LastName = "Qux", DateOfBirth = new DateTime(1990, 2,9)  },
     };
 
+    private static IEnumerable<Tag> _tags = new List<Tag>()
+    {
+        new() { Name = "Test"},
+        new() { Name = "Whatever"},
+        new() { Name = "Another"},
+    };
+
+    class Tag     {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public override string ToString() => Name;
+    }
 
     class User
     {

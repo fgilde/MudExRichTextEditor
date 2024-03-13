@@ -10,10 +10,14 @@
     <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>1.0.4</AssemblyVersion>
+    <AssemblyVersion>1.0.5</AssemblyVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="bundleconfig.json" />
+  </ItemGroup>
 
   
   <ItemGroup>
@@ -21,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorJS" Version="2.1.4" />
-    <PackageReference Include="MudBlazor.Extensions" Version="1.7.84-prev-2401232235-main" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.25" />
+    <PackageReference Include="BlazorJS" Version="2.1.5" />
+    <PackageReference Include="MudBlazor.Extensions" Version="1.7.85" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.27" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +39,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="bundleconfig.json" />
     <!--<None Include="wwwroot\avatar.jpeg">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
