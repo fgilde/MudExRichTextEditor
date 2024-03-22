@@ -36,7 +36,29 @@
         };
     }
 
+    _checkPosition() {
+        const container = this.editor.querySelector('.ql-mention-list-container');
+        const quill = this.editor.__quill;
+        const range = quill.getSelection();
+        if (range) {
+            if (range.length === 0) {
+                const bounds = quill.getBounds(range.index);
+                const editorBounds = quill.container.getBoundingClientRect();
+
+                const absoluteTop = editorBounds.top + bounds.top;
+                const absoluteLeft = editorBounds.left + bounds.left;
+
+                container.style.position = 'fixed';
+                container.style.top = absoluteTop + 'px';
+                container.style.left = absoluteLeft + 'px';
+            }
+        }
+    }
+
+
+
     __getMentionConfig(quillOptions, initialConfig, editorElement) {
+        //ql-mention-list-container
         this.editor = editorElement;
         var existing = quillOptions?.modules?.mention;
 
@@ -53,7 +75,7 @@
                 }
             },
             source: async (searchTerm, renderList, mentionChar) => {
-                if (this.options?.denotationChars?.includes(mentionChar)) {                    
+                if (this.options?.denotationChars?.includes(mentionChar)) {         
                     renderList((await this.dotnet.invokeMethodAsync('GetSuggestions', mentionChar, searchTerm))
                         .map((item) => {
                             item.__editorId = editorElement.id;
@@ -61,6 +83,7 @@
                             item.__dataJson = JSON.stringify(item.data);
                             return item;
                         }));
+                    this._checkPosition();
                 }
             }
         }
