@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.AspNetCore.Components;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Components.Web;
 using MudExRichTextEditor.Extensibility;
 using MudExRichTextEditor.Extensibility.BlotFormatter;
 using MudExRichTextEditor.Extensibility.Mention;
+using static OneOf.Types.TrueFalseOrNull;
 
 namespace MudExRichTextEditor;
 
@@ -118,7 +120,14 @@ public partial class MudExRichTextEdit
     public async Task<string> GetContent()
         => await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement?.__quill?.getContents()), ElementReference);
     public async Task EnableEditor(bool mode)
-        => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode) => quillElement?.__quill?.enable(mode), ElementReference, mode);
+        => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode, placeholder) =>
+        {
+            quillElement?.__quill?.enable(mode);
+            if (quillElement?.__quill?.root?.dataset)
+            {
+                quillElement.__quill.root.dataset.placeholder = mode ? placeholder : "";
+            }
+        }, ElementReference, mode, TryLocalize(Placeholder));
 
     public async Task InsertHtmlAsync(string html) => await JsReference.InvokeVoidAsync("insertMarkup", html);
 
@@ -219,12 +228,14 @@ public partial class MudExRichTextEdit
             QuillElement = ElementReference,
             ToolBar,
             ReadOnly,
-            Placeholder = TryLocalize(Placeholder),
+            Placeholder = GetPlaceholder(),
             Theme = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(Theme),
             DebugLevel = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(DebugLevel),
             Modules = _jsQuillModuleConfigs,
         };
     }
+
+    private string GetPlaceholder() => ReadOnly ? string.Empty : TryLocalize(Placeholder);
 
     public override async Task ImportModuleAndCreateJsAsync()
     {

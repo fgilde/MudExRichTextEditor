@@ -82,13 +82,12 @@
     }
 
     startRecording() {
-        // Überprüfen, ob der Browser die SpeechRecognition API unterstützt
         if ('webkitSpeechRecognition' in window) {
             this.recognition = new webkitSpeechRecognition();
 
-            this.recognition.lang = 'de-DE'; // Setzen Sie die Sprache auf Deutsch
-            this.recognition.continuous = true; // Kontinuierliche Erkennung
-            this.recognition.interimResults = true; // Auch vorläufige Ergebnisse zurückgeben
+            this.recognition.lang = 'de-DE';
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
 
             let isFinalResult = false;
 
@@ -97,16 +96,14 @@
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         isFinalResult = true;
-                        interimTranscript += event.results[i][0].transcript + '\n'; // Fügen Sie einen Zeilenumbruch für das endgültige Ergebnis hinzu
+                        interimTranscript += event.results[i][0].transcript + '\n';
                     } else {
                         interimTranscript += event.results[i][0].transcript;
                     }
                 }
 
-                // Ermitteln Sie die aktuelle Cursorposition
                 let currentCursorPosition = this.quill.getSelection() ? this.quill.getSelection().index : this.quill.getLength();
 
-                // Einfügen des Textes an der aktuellen Cursorposition
                 if (isFinalResult) {
                     this.quill.insertText(currentCursorPosition, interimTranscript, 'user');
                     this.quill.setSelection(currentCursorPosition + interimTranscript.length);
@@ -114,7 +111,6 @@
                 }
             };
 
-            // Starten Sie die Spracherkennung
             this.recognition.start();
             return true;
         } else {
