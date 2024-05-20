@@ -4,6 +4,7 @@
 @using Nextended.Core.Extensions
 @using BlazorJS
 @using Newtonsoft.Json
+@using Nextended.Blazor.Models
 
 <MudToolBar>
     <MudCheckBox Label="Read only" @bind-Checked="_readOnly" />
@@ -16,6 +17,7 @@
                    Immediate="@_updateValueOnChange"
                    Height="400"
                    EnableResize="true"
+                   CustomUploadFunc="OnUpload"
                    Files="@_files"
                    Class="m-2"
                    @bind-Value="@_value"
@@ -135,4 +137,11 @@
         var allTags = await _editor.GetModule<QuillMentionModule<Tag>>().GetMentionsFromContentAsync();
         await _js.AlertAsync(JsonConvert.SerializeObject(allTags.Select(mention => mention.Data)));
     }
+
+    private async Task<string> OnUpload(UploadableFile arg)
+    {        
+        // Here you can perform your custom upload
+        return await DataUrl.GetDataUrlAsync(arg.Data, arg.ContentType);        
+    }
+
 }

@@ -18,8 +18,7 @@ using Nextended.Blazor.Models;
 using Microsoft.AspNetCore.Components.Web;
 using MudExRichTextEditor.Extensibility;
 using MudExRichTextEditor.Extensibility.BlotFormatter;
-using MudExRichTextEditor.Extensibility.Mention;
-using static OneOf.Types.TrueFalseOrNull;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace MudExRichTextEditor;
 
@@ -34,6 +33,7 @@ public partial class MudExRichTextEdit
     private int _toolBarHeight = 42;
     private string _initialContent;
     private bool _initialized = false;
+    private bool _initCalled = false;
     private bool _sourceLoaded = false;
     private bool _readOnly = false;
 
@@ -44,10 +44,16 @@ public partial class MudExRichTextEdit
     #endregion
 
     #region Parameters
-    
+    private string[] _preInitParameters;
+
+    private bool IsOverwritten(string paramName) => _preInitParameters?.Contains(paramName) == true;
     private IQuillModule[] _defaultModules = { new QuillBlotFormatterModule() };
 
     [Parameter] public IQuillModule[] Modules { get; set; }
+
+    [Parameter] public QuillTool[] Tools { get; set; } = null;
+
+    [Parameter] public DefaultToolHandler[] DefaultToolHandlers { get; set; }
 
     /// <summary>
     /// If true, the editor will update the value on immediately while typing otherwise on blur only.
@@ -100,7 +106,7 @@ public partial class MudExRichTextEdit
     }
 
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
-    
+
     public IEnumerable<IQuillModule> AllModules => _defaultModules.Concat(Modules ?? Enumerable.Empty<IQuillModule>());
 
     #endregion
@@ -131,12 +137,32 @@ public partial class MudExRichTextEdit
 
     public async Task InsertHtmlAsync(string html) => await JsReference.InvokeVoidAsync("insertMarkup", html);
 
+    /// <inheritdoc />
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        if (!_initCalled)
+            _preInitParameters = parameters.ToDictionary().Select(x => x.Key).ToArray();
+        return base.SetParametersAsync(parameters);
+    }
+
     protected override Task OnInitializedAsync()
     {
         id ??= Guid.NewGuid().ToFormattedId();
         if (!_initialized && EditorContent == null && !string.IsNullOrWhiteSpace(Value))
             _initialContent = Value;
+        if (!IsOverwritten(nameof(Tools)))
+            Tools = GetTools();        
+        _initCalled = true;
         return base.OnInitializedAsync();
+    }
+
+    private QuillTool[] GetTools()
+    {
+        return QuillTool.All()
+            .Concat(new[] {
+                new CustomTool((_, _) => AttachFilesAsync(), Icons.Material.Filled.AttachFile, "Insert file", Color.Inherit, 6 ),
+                new CustomTool((_, _) => _recording ? StopRecording() : StartRecording(), (_,_) => _recording ? Icons.Material.Filled.Stop : Icons.Material.Filled.Mic, (_,_) => _recording ? "Stop recording" : "Start recording", (_,_) => _recording ? Color.Warning : Color.Inherit)
+            }).ToArray();
     }
 
     [JSInvokable]
@@ -157,6 +183,7 @@ public partial class MudExRichTextEdit
     {
         await RaiseValueChangeForCurrentValue();
     }
+
 
     [JSInvokable]
     public void OnBlur(string content, string source)
@@ -207,6 +234,14 @@ public partial class MudExRichTextEdit
     //public async Task InsertImage(string imageUrl) => await Quill.InsertImage(JsRuntime, ElementReference, imageUrl);
     public async Task InsertImage(string imageUrl) => await JsReference.InvokeAsync<object>(nameof(InsertImage).ToLower(true), imageUrl);
 
+
+    [JSInvokable]
+    public Task DelegateHandler(string identifier, object[] args)
+    {
+        var handler = DefaultToolHandlers?.FirstOrDefault(handler => handler.Identifier == identifier);
+        return handler?.Handler(this, args);
+    }
+    
     private void SetValueBackingField(string value)
     {
         // TODO: Maybe not when readonly?
@@ -225,7 +260,9 @@ public partial class MudExRichTextEdit
     {
         return new
         {
+            BeforeUpload = CustomUploadFunc != null,
             QuillElement = ElementReference,
+            DefaultToolHandlerNames = DefaultToolHandlers?.Select(x => x.Identifier).ToArray(),
             ToolBar,
             ReadOnly,
             Placeholder = GetPlaceholder(),
@@ -336,6 +373,11 @@ public partial class MudExRichTextEdit
         _recording = false;
     }
 
+    [JSInvokable]
+    public Task<string> UploadImage(UploadableFile file) => CustomUploadFunc(file);
+
+    [Parameter] public Func<UploadableFile, Task<string>> CustomUploadFunc { get; set; }
+  
     public async Task AttachFilesAsync()
     {
         await OnBeforeDialogOpen.InvokeAsync();
@@ -369,7 +411,7 @@ public partial class MudExRichTextEdit
         };
         var res = await DialogService.ShowComponentInDialogAsync<MudExUploadEdit<UploadableFile>>(TryLocalize("Insert file"), TryLocalize("Select files to insert"),
             uploadEdit =>
-            {
+            {                
                 uploadEdit.MinHeight = 350;
                 uploadEdit.MaxHeight = 350;
                 uploadEdit.LoadFileDataBytesInBackground = false;
@@ -402,14 +444,20 @@ public partial class MudExRichTextEdit
         await OnDialogClosed.InvokeAsync();
     }
 
+
     public async Task AttachFilesAsync(IEnumerable<UploadableFile> files)
     {
         foreach (var file in files)
         {
             if (string.IsNullOrEmpty(file.Url))
             {
-                await file.EnsureDataLoadedAsync();
-                file.Url = await DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
+                if (CustomUploadFunc != null)
+                    file.Url = await CustomUploadFunc(file);
+                else
+                {
+                    await file.EnsureDataLoadedAsync();
+                    file.Url = await DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
+                }
             }
 
             var markup = MudExFileDisplay.GetFileRenderInfos(Guid.NewGuid().ToFormattedId(), file.Url, file.FileName, file.ContentType, fallBackInIframe: true)

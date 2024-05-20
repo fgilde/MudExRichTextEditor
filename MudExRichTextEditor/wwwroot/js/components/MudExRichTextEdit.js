@@ -41,6 +41,49 @@
         }
         
         this.quill = new Quill(opt.quillElement || this.elementRef, options);
+
+        if(opt.beforeUpload && !opt.defaultToolHandlerNames?.includes('image')) {
+           this.quill.getModule('toolbar').addHandler('image', () => {                    
+                  const input = document.createElement('input');
+                  input.setAttribute('type', 'file');
+                  input.setAttribute('accept', 'image/*');
+                  input.click();
+
+                  input.onchange = (a) => {                      
+                    const file = input.files[0];
+                    if (file) {                        
+                      const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const arrayBuffer = reader.result;
+                            const fileInfo = {
+                                data: new Uint8Array(arrayBuffer),
+                                fileName: file.name,
+                                extension: file.name.includes('.') ? file.name.split('.').slice(-1)[0] : '',
+                                contentType: file.type,
+                                path: '',
+                                size: file.size
+                            };                            
+                            this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
+                                .then(url => {
+                                    const range = this.quill.getSelection();
+                                    this.quill.insertEmbed(range.index, 'image', url);
+                                })
+                                .catch(error => console.error(error));
+                        };
+                        reader.readAsArrayBuffer(file);                     
+                    }
+                  };
+           });
+        }
+        
+        if(opt.defaultToolHandlerNames) {
+            opt.defaultToolHandlerNames.forEach(handler => {
+                this.quill.getModule('toolbar').addHandler(handler, () => {                    
+                    return this.dotnet.invokeMethodAsync('DelegateHandler', handler, [...arguments].slice(1));
+                });
+            });                           
+        }
+
         this.quill.container.addEventListener('mouseleave', () => {
             // Invoke a method when the mouse leaves the editor
             this.dotnet.invokeMethodAsync('OnMouseLeave');

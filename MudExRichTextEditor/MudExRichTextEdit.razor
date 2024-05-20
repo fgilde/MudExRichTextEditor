@@ -1,7 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
 @using MudBlazor.Extensions.Core
 @using MudBlazor.Extensions.Helper
+@using MudExRichTextEditor.Types
 @using SharpCompress.Common
+@using System.Reflection
 @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseFormComponent<MudExRichTextEdit, string, string>
 @inject IJSRuntime JsRuntime
 
@@ -49,75 +51,58 @@ else
 
 @code {
 
-    private RenderFragment RenderToolbar() => ToolbarContent ?? @DefaultToolBar;
+    private RenderFragment RenderToolbar() => ToolbarContent ?? @DefaultToolbar;
 
     private RenderFragment SkeletonButtons(int count)
     {
         return @<p style="display: flex;" class="ml-2">
-            @for (var i = 0; i < count; i++)
-            {
-                <MudSkeleton Class="m-1" Style="margin-right: 2px !important;" SkeletonType="SkeletonType.Circle" Animation="Animation.Wave" Height="24px" Width="24px"/>
-            }
-        </p>;
+        @for (var i = 0; i < count; i++)
+    {
+        <MudSkeleton Class="m-1" Style="margin-right: 2px !important;" SkeletonType="SkeletonType.Circle" Animation="Animation.Wave" Height="24px" Width="24px" />
+    }
+    </p>;
     }
 
-    private void DefaultToolBar(RenderTreeBuilder __builder)
-    {
-        <span class="ql-formats">
-            <select class="ql-header">
-                <option selected=""></option>
-                <option value="1"></option>
-                <option value="2"></option>
-                <option value="3"></option>
-                <option value="4"></option>
-                <option value="5"></option>
-                <option value="6"></option>
-            </select>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-bold"></button>
-            <button class="ql-italic"></button>
-            <button class="ql-underline"></button>
-            <button class="ql-strike"></button>
-        </span>
-        <span class="ql-formats">
-            <select class="ql-color"></select>
-            <select class="ql-background"></select>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-list" value="ordered"></button>
-            <button class="ql-list" value="bullet"></button>
-            <button class="ql-indent" value="-1"></button>
-            <button class="ql-indent" value="+1"></button>
-            <select class="ql-align">
-                <option selected=""></option>
-                <option value="center"></option>
-                <option value="right"></option>
-                <option value="justify"></option>
-            </select>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-blockquote"></button>
-            <button class="ql-code-block"></button>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-link"></button>
-            <button class="ql-image"></button>
-            <button class="ql-video"></button>
-            <QuillToolButton OnClick="@AttachFilesAsync" Icon="@Icons.Material.Filled.AttachFile" Tooltip="@TryLocalize("Insert file")"></QuillToolButton>
 
-            @*<button ><MudIcon Icon="@MudBlazor.Icons.Material.Filled.Image"></MudIcon></button>*@
-        </span>
-        <span class="ql-formats">
-            @if (_recording)
-            {
-                <QuillToolButton OnClick="@StopRecording" Color="@Color.Warning" Icon="@Icons.Material.Filled.Stop" Tooltip="@TryLocalize("Stop recording")"></QuillToolButton>
-            }
-            else
-            {
-                <QuillToolButton OnClick="@StartRecording" Icon="@Icons.Material.Filled.Mic" Tooltip="@TryLocalize("Start recording")"></QuillToolButton>
-            }
-        </span>
+    private void DefaultToolbar(RenderTreeBuilder __builder)
+    {
+        var groupedTools = Tools.GroupBy(t => t.Group).OrderBy(g => g.Key);
+
+        foreach (var group in groupedTools)
+        {
+            <span class="ql-formats">
+                @foreach (var tool in group)
+                {
+                    if (tool is CustomTool custom)
+                    {
+                        <QuillToolButton Color="@(custom.Color(custom, this))" OnClick="@(() => custom.OnClick(custom, this))" Icon="@(custom.Icon(custom, this))" Tooltip="@TryLocalize(custom.Tooltip(custom, this))"></QuillToolButton>
+                    }
+                    else
+                    {
+                        if (tool.Options != null)
+                        {
+                            <select class="@(tool.Class)">
+                                @foreach (var option in tool.Options)
+                                {
+                                    <option value="@option"></option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrEmpty(tool.Value))
+                            {
+                                <button class="@(tool.Class)" value="@(tool.Value)"></button>
+                            }
+                            else
+                            {
+                                <button class="@(tool.Class)"></button>
+                            }
+                        }
+                    }
+                }
+            </span>
+        }
     }
 }
 
