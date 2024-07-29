@@ -2,24 +2,26 @@
     elementRef;
     options;
     dotnet;
-    quill; 
+    quill;
     //https://github.com/quilljs/awesome-quill?tab=readme-ov-file
-    constructor(elementRef, dotNet, options) {        
-        this.elementRef = elementRef;        
+    constructor(elementRef, dotNet, options) {
+        this.elementRef = elementRef;
         this.dotnet = dotNet;
         //Quill.register("modules/htmlEditButton", htmlEditButton);
 
+        Quill.register("modules/imageCompressor", imageCompressor);
+
         if (window.QuillBlotFormatter && window.QuillBlotFormatter.default)
             Quill.register('modules/blotFormatter', QuillBlotFormatter.default);
-      
-        this.create(this.options = options);        
+
+        this.create(this.options = options);
     }
 
-    create(opt) {                
+    create(opt) {
         var options = {
             debug: opt.debugLevel,
-            modules: {                
-                toolbar: opt.toolBar                              
+            modules: {
+                toolbar: opt.toolBar
             },
             placeholder: opt.placeholder,
             readOnly: opt.readOnly,
@@ -31,28 +33,28 @@
         }
 
         if (opt.modules && opt.modules.length) {
-            opt.modules.forEach(module => {                
+            opt.modules.forEach(module => {
                 const owner = module.jsReference || window;
-                const moduleConfig = module.jsConfigFunction && owner[module.jsConfigFunction] ? owner[module.jsConfigFunction](options, opt, opt.quillElement || this.elementRef ) : module.options;
+                const moduleConfig = module.jsConfigFunction && owner[module.jsConfigFunction] ? owner[module.jsConfigFunction](options, opt, opt.quillElement || this.elementRef) : module.options;
                 if (moduleConfig) {
                     options.modules = { ...options.modules, ...moduleConfig };
                 }
             });
         }
-        
+
         this.quill = new Quill(opt.quillElement || this.elementRef, options);
 
-        if(opt.beforeUpload && !opt.defaultToolHandlerNames?.includes('image')) {
-           this.quill.getModule('toolbar').addHandler('image', () => {                    
-                  const input = document.createElement('input');
-                  input.setAttribute('type', 'file');
-                  input.setAttribute('accept', 'image/*');
-                  input.click();
+        if (opt.beforeUpload && !opt.defaultToolHandlerNames?.includes('image')) {
+            this.quill.getModule('toolbar').addHandler('image', () => {
+                const input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+                input.click();
 
-                  input.onchange = (a) => {                      
+                input.onchange = (a) => {
                     const file = input.files[0];
-                    if (file) {                        
-                      const reader = new FileReader();
+                    if (file) {
+                        const reader = new FileReader();
                         reader.onload = (e) => {
                             const arrayBuffer = reader.result;
                             const fileInfo = {
@@ -62,7 +64,7 @@
                                 contentType: file.type,
                                 path: '',
                                 size: file.size
-                            };                            
+                            };
                             this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
                                 .then(url => {
                                     const range = this.quill.getSelection();
@@ -70,18 +72,18 @@
                                 })
                                 .catch(error => console.error(error));
                         };
-                        reader.readAsArrayBuffer(file);                     
+                        reader.readAsArrayBuffer(file);
                     }
-                  };
-           });
+                };
+            });
         }
-        
-        if(opt.defaultToolHandlerNames) {
+
+        if (opt.defaultToolHandlerNames) {
             opt.defaultToolHandlerNames.forEach(handler => {
-                this.quill.getModule('toolbar').addHandler(handler, () => {                    
+                this.quill.getModule('toolbar').addHandler(handler, () => {
                     return this.dotnet.invokeMethodAsync('DelegateHandler', handler, [...arguments].slice(1));
                 });
-            });                           
+            });
         }
 
         this.quill.container.addEventListener('mouseleave', () => {
@@ -161,10 +163,10 @@
         }
     }
 
-    adjustTooltipPosition() {        
+    adjustTooltipPosition() {
         var resize = window.getComputedStyle(this.quill.root.parentNode).getPropertyValue('resize');
-        
-        if(!resize || resize === 'none') {
+
+        if (!resize || resize === 'none') {
             return;
         }
 
@@ -181,7 +183,7 @@
         }
     }
 
-    insertImage (imageURL) {        
+    insertImage(imageURL) {
         var Delta = Quill.import('delta'),
             editorIndex = 0;
 
@@ -195,15 +197,15 @@
                 .insert({ image: imageURL },
                     { alt: imageURL }));
     }
-   
 
-    insertMarkup(htmlMarkup) {        
-        let cursorPosition = this.quill.getSelection()?.index ?? this.quill.getLength();        
-        this.quill.clipboard.dangerouslyPasteHTML(cursorPosition, htmlMarkup);        
+
+    insertMarkup(htmlMarkup) {
+        let cursorPosition = this.quill.getSelection()?.index ?? this.quill.getLength();
+        this.quill.clipboard.dangerouslyPasteHTML(cursorPosition, htmlMarkup);
         this.quill.setSelection(cursorPosition + htmlMarkup.length);
     }
-    
-    dispose() {        
+
+    dispose() {
         clearInterval(this.interval);
         this.stopRecording();
     }
@@ -211,6 +213,6 @@
 
 window.MudExRichTextEdit = MudExRichTextEdit;
 
-export function initializeMudExRichTextEdit(elementRef, dotnet, options) {    
+export function initializeMudExRichTextEdit(elementRef, dotnet, options) {
     return new MudExRichTextEdit(elementRef, dotnet, options);
 }
