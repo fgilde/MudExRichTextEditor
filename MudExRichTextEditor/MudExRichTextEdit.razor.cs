@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Components.Web;
 using MudExRichTextEditor.Extensibility;
 using MudExRichTextEditor.Extensibility.BlotFormatter;
 using Microsoft.AspNetCore.Components.Forms;
+using MudExRichTextEditor.Extensibility.ImageCompressor;
 
 namespace MudExRichTextEditor;
 
@@ -47,7 +48,7 @@ public partial class MudExRichTextEdit
     private string[] _preInitParameters;
 
     private bool IsOverwritten(string paramName) => _preInitParameters?.Contains(paramName) == true;
-    private IQuillModule[] _defaultModules = { new QuillBlotFormatterModule() };
+    private IQuillModule[] _defaultModules = { new QuillBlotFormatterModule(), new QuillImageCompressorModule() };
 
     [Parameter] public IQuillModule[] Modules { get; set; }
 
