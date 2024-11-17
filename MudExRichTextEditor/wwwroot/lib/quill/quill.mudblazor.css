@@ -16,6 +16,62 @@
     --quill-dark-text-color: var(--mud-palette-text-primary, #444);
 }
 
+.h1 {
+    font-size: var(--mud-typography-h1-size);
+    font-family: var(--mud-typography-h1-family);
+    font-weight: var(--mud-typography-h1-weight);
+    line-height: var(--mud-typography-h1-lineheight);
+    letter-spacing: var(--mud-typography-h1-letterspacing);
+    text-transform: var(--mud-typography-h1-text-transform);
+}
+
+.h2 {
+    font-size: var(--mud-typography-h2-size);
+    font-family: var(--mud-typography-h2-family);
+    font-weight: var(--mud-typography-h2-weight);
+    line-height: var(--mud-typography-h2-lineheight);
+    letter-spacing: var(--mud-typography-h2-letterspacing);
+    text-transform: var(--mud-typography-h2-text-transform);
+}
+
+.h3 {
+    font-size: var(--mud-typography-h3-size);
+    font-family: var(--mud-typography-h3-family);
+    font-weight: var(--mud-typography-h3-weight);
+    line-height: var(--mud-typography-h3-lineheight);
+    letter-spacing: var(--mud-typography-h3-letterspacing);
+    text-transform: var(--mud-typography-h3-text-transform);
+}
+
+.h4 {
+    font-size: var(--mud-typography-h4-size);
+    font-family: var(--mud-typography-h4-family);
+    font-weight: var(--mud-typography-h4-weight);
+    line-height: var(--mud-typography-h4-lineheight);
+    letter-spacing: var(--mud-typography-h4-letterspacing);
+    text-transform: var(--mud-typography-h4-text-transform);
+}
+
+.h5 {
+    font-size: var(--mud-typography-h5-size);
+    font-family: var(--mud-typography-h5-family);
+    font-weight: var(--mud-typography-h5-weight);
+    line-height: var(--mud-typography-h5-lineheight);
+    letter-spacing: var(--mud-typography-h5-letterspacing);
+    text-transform: var(--mud-typography-h5-text-transform);
+}
+
+.h6 {
+    font-size: var(--mud-typography-h6-size);
+    font-family: var(--mud-typography-h6-family);
+    font-weight: var(--mud-typography-h6-weight);
+    line-height: var(--mud-typography-h6-lineheight);
+    letter-spacing: var(--mud-typography-h6-letterspacing);
+    text-transform: var(--mud-typography-h6-text-transform);
+}
+
+
+
 .ql-font-opensans {
     font-family: 'Open Sans', sans-serif;
 }
