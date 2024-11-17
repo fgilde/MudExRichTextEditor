@@ -433,6 +433,7 @@ public partial class MudExRichTextEdit
                 options.DialogAppearance = MudExAppearance.FromStyle(new
                 {
                     Border = "1px solid",
+                    Position = "absolute",
                     BorderColor = Color.Primary,
                     BorderRadius = 8
                 });
