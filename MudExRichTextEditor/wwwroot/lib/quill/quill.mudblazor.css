@@ -3,7 +3,7 @@
     --quill-font-size: var(--mud-typography-body1-font-size, 13px);
     --quill-text-color: var(--mud-palette-text-primary, #000);
     --quill-bg-color: var(--mud-palette-background, #fff);
-    --quill-toolbar-bg-color: var(--mud-palette-background-grey, #fff);
+    --quill-toolbar-bg-color: var(--mud-palette-background, #fff);
     --quill-border-color: var(--mud-palette-grey-darken-2, #ccc);
     --quill-placeholder-color: rgba(0, 0, 0, 0.6); /* Keine MudBlazor-Variable vorhanden */
     --quill-primary-color: var(--mud-palette-primary, #06c);

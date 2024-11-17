@@ -7,8 +7,8 @@
 @using Nextended.Blazor.Models
 
 <MudToolBar>
-    <MudCheckBox Label="Read only" @bind-Checked="_readOnly" />
-    <MudCheckBox Label="Update Value on change" @bind-Checked="_updateValueOnChange" />
+    <MudCheckBox Label="Read only" @bind-Value="_readOnly" />
+    <MudCheckBox Label="Update Value on change" @bind-Value="_updateValueOnChange" />
 </MudToolBar>
 
 <MudExRichTextEdit @ref="_editor"
