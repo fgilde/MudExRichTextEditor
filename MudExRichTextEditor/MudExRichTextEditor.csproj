@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <Authors>Florian Gilde</Authors>
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/fgilde/MudExRichTextEditor</RepositoryUrl>
@@ -10,9 +10,9 @@
     <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>2.0.2</Version>
+    <Version>8.0.0-prev-1</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>2.0.2</AssemblyVersion>
+    <AssemblyVersion>8.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,8 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorJS" Version="2.1.6" />
-    <PackageReference Include="MudBlazor.Extensions" Version="2.0.7.1" />
+    <PackageReference Include="BlazorJS" Version="2.2.0" />
+    <!--<PackageReference Include="MudBlazor.Extensions" Version="2.1.0" />-->
+    <PackageReference Include="MudBlazor.Extensions" Version="8.0.0-prev-2501131732-mudblazor-8" />
   </ItemGroup>
 
   <ItemGroup>
