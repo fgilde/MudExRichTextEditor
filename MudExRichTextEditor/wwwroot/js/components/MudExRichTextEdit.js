@@ -42,7 +42,11 @@
             });
         }
 
-        this.quill = new Quill(opt.quillElement || this.elementRef, options);
+        this.quill = new Quill(opt.quillElement || this.elementRef, options);        
+        this.__quill = this.__quill || this.quill;
+        opt.quillElement.__quill = this.__quill;
+        opt.quillElement.quill = this.quill;
+        opt.quillElement.mudRichTextEdit = this;
 
         if (opt.beforeUpload && !opt.defaultToolHandlerNames?.includes('image')) {
             this.quill.getModule('toolbar').addHandler('image', () => {

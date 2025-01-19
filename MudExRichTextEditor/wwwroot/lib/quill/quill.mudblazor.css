@@ -16,6 +16,13 @@
     --quill-dark-text-color: var(--mud-palette-text-primary, #444);
 }
 
+.blot-formatter__toolbar-button {
+    background-color: var(--quill-toolbar-bg-color) !important;
+}
+.blot-formatter__toolbar-button svg {
+    background: none !important;
+}
+
 .h1 {
     font-size: var(--mud-typography-h1-size);
     font-family: var(--mud-typography-h1-family);

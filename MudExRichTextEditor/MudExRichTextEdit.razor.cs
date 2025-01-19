@@ -18,7 +18,6 @@ using Nextended.Blazor.Models;
 using Microsoft.AspNetCore.Components.Web;
 using MudExRichTextEditor.Extensibility;
 using MudExRichTextEditor.Extensibility.BlotFormatter;
-using Microsoft.AspNetCore.Components.Forms;
 using MudExRichTextEditor.Extensibility.ImageCompressor;
 
 namespace MudExRichTextEditor;
@@ -43,6 +42,9 @@ public partial class MudExRichTextEdit
     internal ElementReference ToolBar;
 
     #endregion
+
+    private static string AssemblyVersion => typeof(MudExRichTextEdit).Assembly.GetName().Version.ToString();
+    public static string CacheBuster => "?c=" + AssemblyVersion;
 
     #region Parameters
     private string[] _preInitParameters;
@@ -276,18 +278,18 @@ public partial class MudExRichTextEdit
     private string GetPlaceholder() => ReadOnly ? string.Empty : TryLocalize(Placeholder);
 
     public override async Task ImportModuleAndCreateJsAsync()
-    {
+    {        
         await JsRuntime.LoadFilesAsync(
-            "./_content/MudExRichTextEditor/lib/quill/quill.bubble.css",
-            "./_content/MudExRichTextEditor/lib/quill/quill.snow.css",
-            $"./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css?c={Guid.NewGuid():N}",
+            $"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css{CacheBuster}",
+            $"./_content/MudExRichTextEditor/lib/quill/quill.snow.css{CacheBuster}",
+            $"./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css{CacheBuster}",
             //"./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js",
-            "./_content/MudExRichTextEditor/lib/quill/quill.js"
+            $"./_content/MudExRichTextEditor/lib/quill/quill.js{CacheBuster}"
         );
 
         await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
         await LoadModules();
-        //await JsRuntime.ImportModuleAsync("https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js");
+        //await JsRuntime.ImportModuleAsync($"https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js{CacheBuster}");
         _sourceLoaded = true;
         await InvokeAsync(StateHasChanged);
 

@@ -32,8 +32,8 @@ public class QuillMentionModule<T> : IQuillModule
     public IJSObjectReference JsReference { get; private set; }
     public IJSObjectReference ModuleReference { get; private set; }
 
-    public string[] JsFiles => new[] { "./_content/MudExRichTextEditor/modules/quill.mention.min.js" };
-    public string[] CssFiles => new[] { "./_content/MudExRichTextEditor/lib/quill/quill.mention.css" };
+    public string[] JsFiles => new[] { $"./_content/MudExRichTextEditor/modules/quill.mention.min.js{MudExRichTextEdit.CacheBuster}" };
+    public string[] CssFiles => new[] { $"./_content/MudExRichTextEditor/lib/quill/quill.mention.css{MudExRichTextEdit.CacheBuster}" };
 
     public string JsConfigFunction => "__getMentionConfig";
 
@@ -42,7 +42,7 @@ public class QuillMentionModule<T> : IQuillModule
     public async Task<IJSObjectReference> OnLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
     {
         _reference = DotNetObjectReference.Create(this);
-        var res = await jsRuntime.ImportModuleAndCreateJsAsync("./_content/MudExRichTextEditor/modules/quill.mention.module.js", "initializeMentionModule", _reference, JsOptions());
+        var res = await jsRuntime.ImportModuleAndCreateJsAsync($"./_content/MudExRichTextEditor/modules/quill.mention.module.js{MudExRichTextEdit.CacheBuster}", "initializeMentionModule", _reference, JsOptions());
         JsReference = res.jsObjectReference;
         ModuleReference = res.moduleReference;
         return JsReference;

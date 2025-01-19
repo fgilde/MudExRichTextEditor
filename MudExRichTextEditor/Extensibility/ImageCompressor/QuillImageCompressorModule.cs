@@ -7,7 +7,7 @@ namespace MudExRichTextEditor.Extensibility.ImageCompressor;
 internal class QuillImageCompressorModule : IQuillModule
 {
 
-    public string[] JsFiles => new[] { "./_content/MudExRichTextEditor/modules/quill.imageCompressor.min.js" };
+    public string[] JsFiles => new[] { $"./_content/MudExRichTextEditor/modules/quill.imageCompressor.min.js{MudExRichTextEdit.CacheBuster}" };
     public string[] CssFiles => Array.Empty<string>();
     public string JsConfigFunction => @"imageCompress: {
       quality: 0.7, // default

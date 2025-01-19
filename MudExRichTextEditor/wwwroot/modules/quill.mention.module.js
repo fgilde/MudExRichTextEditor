@@ -36,12 +36,12 @@
         };
     }
 
-    _checkPosition() {
+    _checkPosition() {        
         const container = this.editor.querySelector('.ql-mention-list-container');
         const quill = this.editor.__quill;
         const range = quill.getSelection();
         if (range) {
-            if (range.length === 0) {
+            if (range.length === 0 && container) {                
                 const bounds = quill.getBounds(range.index);
                 const editorBounds = quill.container.getBoundingClientRect();
 
