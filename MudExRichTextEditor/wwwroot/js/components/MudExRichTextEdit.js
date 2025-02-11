@@ -82,6 +82,38 @@
             });
         }
 
+        if (opt.beforeUpload) {
+            this.quill.root.addEventListener('paste',
+                (event) => {
+                    if (event.clipboardData && event.clipboardData.files && event.clipboardData.files.length > 0) {
+                        const file = event.clipboardData.files[0];
+                        if (file) {
+                            event.preventDefault();
+                            event.stopImmediatePropagation();
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                const arrayBuffer = reader.result;
+                                const fileInfo = {
+                                    data: new Uint8Array(arrayBuffer),
+                                    fileName: file.name,
+                                    extension: file.name.includes('.') ? file.name.split('.').pop() : '',
+                                    contentType: file.type,
+                                    path: '',
+                                    size: file.size
+                                };
+                                this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
+                                    .then(url => {
+                                        const range = this.quill.getSelection() || { index: this.quill.getLength() };
+                                        this.quill.insertEmbed(range.index, 'image', url);
+                                    })
+                                    .catch(error => console.error(error));
+                            };
+                            reader.readAsArrayBuffer(file);
+                        }
+                    }
+                }, true);
+        }
+
         if (opt.defaultToolHandlerNames) {
             opt.defaultToolHandlerNames.forEach(handler => {
                 this.quill.getModule('toolbar').addHandler(handler, () => {
