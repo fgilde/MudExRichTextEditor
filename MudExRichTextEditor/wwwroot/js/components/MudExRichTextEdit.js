@@ -42,7 +42,7 @@
             });
         }
 
-        this.quill = new Quill(opt.quillElement || this.elementRef, options);        
+        this.quill = new Quill(opt.quillElement || this.elementRef, options);
         this.__quill = this.__quill || this.quill;
         opt.quillElement.__quill = this.__quill;
         opt.quillElement.quill = this.quill;
@@ -104,7 +104,15 @@
                                 this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
                                     .then(url => {
                                         const range = this.quill.getSelection() || { index: this.quill.getLength() };
-                                        this.quill.insertEmbed(range.index, 'image', url);
+                                        if(fileInfo.contentType.indexOf('image') !== -1) {
+                                            this.quill.insertEmbed(range.index, 'image', url);
+                                        }
+                                        else {
+                                            this.quill.insertText(range.index, fileInfo.fileName, 'user');
+                                            this.quill.setSelection(range.index, fileInfo.fileName.length);
+                                            this.quill.theme.tooltip.edit('link', url);
+                                            this.quill.theme.tooltip.save();
+                                        }
                                     })
                                     .catch(error => console.error(error));
                             };
