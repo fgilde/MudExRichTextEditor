@@ -1,0 +1,31 @@
+﻿@using MudBlazor
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="_dark" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        MudExRichTextEdit (Server Side)
+        <MudSpacer/>            
+        <MudIconButton Icon="@Icons.Material.Filled.WbSunny" Color="@(_dark ? Color.Warning : Color.Inherit)" Edge="Edge.Start" OnClick="@(() => _dark = !_dark)" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_drawerOpen">
+        <NavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+@code {
+    bool _drawerOpen = true;
+    bool _dark = true;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}

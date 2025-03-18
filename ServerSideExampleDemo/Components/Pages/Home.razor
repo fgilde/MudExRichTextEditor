@@ -1,0 +1,167 @@
+﻿@page "/"
+@using MudExRichTextEditor.Extensibility
+@using MudExRichTextEditor.Extensibility.Mention
+@using Nextended.Core.Extensions
+@using BlazorJS
+@using Microsoft.Extensions.Localization
+@using MudBlazor.Extensions.Components
+@using MudBlazor.Extensions.Helper
+@using MudExRichTextEditor
+@using Newtonsoft.Json
+@using Nextended.Blazor.Models
+@rendermode InteractiveServer
+
+@inject IStringLocalizer<Home> _Localizer;
+@inject IJSRuntime _jsRuntime;
+
+<MudToolBar>
+    <MudCheckBox Label="Read only" @bind-Value="_readOnly" />
+    <MudCheckBox Label="Update Value on change" @bind-Value="_updateValueOnChange" />
+</MudToolBar>
+
+<MudExRichTextEdit @ref="_editor"
+    Localizer="_Localizer"
+    Modules="@_modules"
+    ReadOnly="@_readOnly"
+    Immediate="@_updateValueOnChange"
+    Height="400"
+    EnableResize="true"
+    CustomUploadFunc="OnUpload"
+    Files="@_files"
+    Class="m-2"
+    @bind-Value="@_value"
+    Placeholder="Write your shit right here">
+
+</MudExRichTextEdit>
+
+<MudButton OnClick="@(() => { _value = "<b>MoIn</b>"; InvokeAsync(StateHasChanged); })">Set Value to Moin</MudButton>
+<MudButton OnClick="@(() => {ShowUserMentions(); })">Show User Mentions</MudButton>
+<MudButton OnClick="@(() => {ShowTagMentions(); })">Show Tag Mentions</MudButton>
+
+<textarea class="m-2" style="width: 100%; height: 400px;" readonly="readonly">@_value</textarea>
+
+@code {
+
+    MudExRichTextEdit _editor;
+    bool _readOnly = false;
+    bool _updateValueOnChange;
+    string _value = "<b>This</b> initial value will change in 2 seconds";
+    private IQuillModule[] _modules;
+    [Inject]
+    private IJSRuntime _js { get; set; }
+
+
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await JsImportHelper.InitializeMudBlazorExtensionsAsync(_jsRuntime);
+    //     await base.OnInitializedAsync();
+    // }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // if(firstRender)
+        //     await _editor.ImportModuleAndCreateJsAsync();
+       await JsImportHelper.InitializeMudBlazorExtensionsAsync(_jsRuntime);
+        if (firstRender)
+        {
+            await Task.Delay(2000);
+            _value = "<b>This is the new value now </b> <a href=\"https://www.mudex.org\">mudex.org</a>";
+            StateHasChanged();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _modules = new IQuillModule[] {
+            new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$').SetProperties(m => m.MentionClicked = UserMentionClicked, m => m.AfterMentionSelect = AfterUserMentionSelect),
+            new QuillMentionModule<Tag>((c, s) => Task.FromResult(_tags.Where(tag => tag.Name.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '#').SetProperties(m => m.MentionClicked = TagMentionClicked)
+        };
+        base.OnInitialized();
+    }
+
+    private void AfterUserMentionSelect(User obj)
+    {
+        Console.WriteLine(obj.FullName);
+    }
+
+    private async void TagMentionClicked(Tag obj)
+    {
+        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
+
+    }
+
+
+    private async void UserMentionClicked(User obj)
+    {
+        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
+    }
+
+    private IList<UploadableFile> _files = new List<UploadableFile>()
+    {
+        new()
+        {
+            Url = "https://mudex.azurewebsites.net/sample-data/logo.png",
+            FileName = "logo.png",
+            ContentType = "image/png"
+        },
+        new()
+        {
+            Url = "https://mudex.azurewebsites.net/sample-data/sample.pdf",
+            FileName = "sample.pdf",
+            ContentType = "application/pdf"
+        },
+    };
+
+    private static IEnumerable<User> _users = new List<User>()
+    {
+        new() { FirstName = "Florian", LastName = "Gilde", DateOfBirth = new DateTime(1983, 6,8)},
+        new() { FirstName = "John", LastName = "Doe", DateOfBirth = new DateTime(1974, 5,11)},
+        new() { FirstName = "Jane", LastName = "Doe", DateOfBirth = new DateTime(1977, 12,21) },
+        new() { FirstName = "Foo", LastName = "Bar", DateOfBirth = new DateTime(2000, 1,1)  },
+        new() { FirstName = "Baz", LastName = "Qux", DateOfBirth = new DateTime(1990, 2,9)  },
+    };
+
+    private static IEnumerable<Tag> _tags = new List<Tag>()
+    {
+        new() { Name = "Test"},
+        new() { Name = "Whatever"},
+        new() { Name = "Another"},
+    };
+
+    class Tag
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public override string ToString() => Name;
+    }
+
+    class User
+    {
+        public int Age => DateTime.Today.Year - DateOfBirth.Year - (DateOfBirth.Date > DateTime.Today.AddYears(-DateOfBirth.Year) ? 1 : 0);
+        public DateTime DateOfBirth { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string FullName => $"{FirstName} {LastName}";
+        public override string ToString() => FullName;
+    }
+
+    private async Task ShowUserMentions()
+    {
+        var allUsers = await _editor.GetModule<QuillMentionModule<User>>().GetMentionsFromContentAsync();
+        await _js.AlertAsync(JsonConvert.SerializeObject(allUsers.Select(mention => mention.Data)));
+    }
+    private async Task ShowTagMentions()
+    {
+        var allTags = await _editor.GetModule<QuillMentionModule<Tag>>().GetMentionsFromContentAsync();
+        await _js.AlertAsync(JsonConvert.SerializeObject(allTags.Select(mention => mention.Data)));
+    }
+
+    private async Task<string> OnUpload(UploadableFile arg)
+    {        
+        // Here you can perform your custom upload
+        return await DataUrl.GetDataUrlAsync(arg.Data, arg.ContentType);        
+    }
+
+}
