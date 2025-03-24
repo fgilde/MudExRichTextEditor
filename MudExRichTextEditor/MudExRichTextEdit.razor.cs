@@ -263,7 +263,8 @@ public partial class MudExRichTextEdit
     {
         return new
         {
-            BeforeUpload = CustomUploadFunc != null,
+            //BeforeUpload = CustomUploadFunc != null,
+            BeforeUpload = true,
             QuillElement = ElementReference,
             DefaultToolHandlerNames = DefaultToolHandlers?.Select(x => x.Identifier).ToArray(),
             ToolBar,
@@ -377,7 +378,7 @@ public partial class MudExRichTextEdit
     }
 
     [JSInvokable]
-    public Task<string> UploadImage(UploadableFile file) => CustomUploadFunc(file);
+    public Task<string> UploadImage(UploadableFile file) => CustomUploadFunc != null ? CustomUploadFunc(file) : Nextended.Core.Types.DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
 
     [Parameter] public Func<UploadableFile, Task<string>> CustomUploadFunc { get; set; }
   
