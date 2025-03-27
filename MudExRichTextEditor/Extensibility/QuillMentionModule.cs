@@ -6,16 +6,17 @@ using BlazorJS;
 using Microsoft.JSInterop;
 using Nextended.Core.Extensions;
 
-namespace MudExRichTextEditor.Extensibility.Mention;
 
-public class QuillMentionModule<T> : IQuillModule
+namespace MudExRichTextEditor.Extensibility;
+
+public class QuillMentionModule<T> : QuillModule
 {
     private readonly char[] _denotationChars;
     private readonly Func<char, string, Task<IEnumerable<T>>> _getItemsFunc;
     private DotNetObjectReference<QuillMentionModule<T>> _reference;
 
     public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char denotationChar, params char[] denotationChars)
-    : this(getItemsFunc, new[] { denotationChar }.Concat(denotationChars ?? Array.Empty<char>()).ToArray())
+    : this(getItemsFunc, new[] { denotationChar }.Concat(denotationChars ?? []).ToArray())
     { }
 
     public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char[] denotationChars)
@@ -24,22 +25,22 @@ public class QuillMentionModule<T> : IQuillModule
         _getItemsFunc = getItemsFunc;
     }
     
-    public Action<T> MentionClicked { get; set; }
-    public Action<T> MentionHovered { get; set; }
-    public Action<T> BeforeMentionSelect { get; set; }
-    public Action<T> AfterMentionSelect { get; set; }
+    public Func<T, Task> MentionClicked { get; set; }
+    public Func<T, Task> MentionHovered { get; set; }
+    public Func<T, Task> BeforeMentionSelect { get; set; }
+    public Func<T, Task> AfterMentionSelect { get; set; }
 
     public IJSObjectReference JsReference { get; private set; }
     public IJSObjectReference ModuleReference { get; private set; }
 
-    public string[] JsFiles => new[] { $"./_content/MudExRichTextEditor/modules/quill.mention.min.js{MudExRichTextEdit.CacheBuster}" };
-    public string[] CssFiles => new[] { $"./_content/MudExRichTextEditor/lib/quill/quill.mention.css{MudExRichTextEdit.CacheBuster}" };
+    public override string[] JsFiles => [$"./_content/MudExRichTextEditor/modules/quill.mention.min.js{MudExRichTextEdit.CacheBuster}"];
+    public override string[] CssFiles => [$"./_content/MudExRichTextEditor/lib/quill/quill.mention.css{MudExRichTextEdit.CacheBuster}"];
 
-    public string JsConfigFunction => "__getMentionConfig";
+    public override string JsConfigFunction => "__getMentionConfig";
 
-    public Task<object> GetQuillJsCreationConfigAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor) => Task.FromResult<object>(null);
+    public override Task<object> GetQuillJsCreationConfigAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor) => Task.FromResult<object>(null);
 
-    public async Task<IJSObjectReference> OnLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
+    protected override async Task<IJSObjectReference> OnModuleLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
     {
         _reference = DotNetObjectReference.Create(this);
         var res = await jsRuntime.ImportModuleAndCreateJsAsync($"./_content/MudExRichTextEditor/modules/quill.mention.module.js{MudExRichTextEdit.CacheBuster}", "initializeMentionModule", _reference, JsOptions());
@@ -55,11 +56,6 @@ public class QuillMentionModule<T> : IQuillModule
             denotationChars = _denotationChars,
             type = typeof(T).FullName
         };
-    }
-
-    public Task OnCreatedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
-    {
-        return Task.CompletedTask;
     }
 
     [JSInvokable]
@@ -78,30 +74,26 @@ public class QuillMentionModule<T> : IQuillModule
     [JSInvokable]
     public virtual Task OnBeforeSelect(Mention<T> item)
     {
-        BeforeMentionSelect?.Invoke(item.Data);
-        return Task.CompletedTask;
+        return BeforeMentionSelect?.Invoke(item.Data);
     }
 
     [JSInvokable]
     public virtual Task OnMentionHovered(Mention<T> item)
     {
-        MentionHovered?.Invoke(item.Data);
-        return Task.CompletedTask;
+        return MentionHovered?.Invoke(item.Data);
     }
 
     [JSInvokable]
     public virtual Task OnMentionClicked(Mention<T> item)
     {
-        MentionClicked?.Invoke(item.Data);
-        return Task.CompletedTask;
+        return MentionClicked?.Invoke(item.Data);
     }
 
 
     [JSInvokable]
     public virtual Task OnAfterSelect(Mention<T> item)
     {
-        AfterMentionSelect?.Invoke(item.Data);
-        return Task.CompletedTask;
+        return AfterMentionSelect?.Invoke(item.Data);
     }
 
     public async ValueTask DisposeAsync()

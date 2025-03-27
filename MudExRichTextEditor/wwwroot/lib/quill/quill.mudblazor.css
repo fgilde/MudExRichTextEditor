@@ -14,6 +14,26 @@
     --quill-light-bg-color: var(--mud-palette-grey-lighten-3, #f0f0f0);
     --quill-dark-bg-color: var(--mud-palette-grey-darken-3, #23241f);
     --quill-dark-text-color: var(--mud-palette-text-primary, #444);
+    /*--quill-disabled-bg-color: var(--mud-palette-text-primary, #444);*/
+    --quill-disabled-bg-color: transparent;
+    --quill-disabled-fg-color: var(--quill-text-color);
+    --quill-hover-bg-color: var(--mud-palette-secondary-hover);
+    --quill-hover-fg-color: var(--quill-primary-color);
+    /*--quill-selection-bg-color: var(--mud-palette-text-primary, #444);*/
+    --quill-selection-bg-color: var(--mud-palette-secondary-hover);
+    --quill-selection-fg-color: var(--quill-primary-color);
+    --quill-focus-border-color: var(--mud-palette-primary, #3779eb);
+    --quill-focus-box-shadow-color: var(--mud-focus-box-shadow-color, #cae1fc);
+    --mud-border-radius: var(--mud-border-radius, 2px);
+    --mud-box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.15);
+    --quill-tooltip-bg-color: rgba(0,0,0,0.85);
+    --quill-tooltip-border-radius: 6px;
+    --quill-tooltip-text-color: #fff;
+    --quill-tooltip-shadow-color: rgba(0,0,0,0.15);
+    --quill-error-box-shadow-color: rgba(255,64,31,0.3);
+    --quill-btn-checked-bg-color: #f0f7ff;
+    --quill-btn-checked-stroke-color: #2977ff;
+    --quill-select-label-color: var(--mud-palette-text-secondary, rgba(34,47,62,0.7));
 }
 
 .blot-formatter__toolbar-button {
@@ -21,6 +41,12 @@
 }
 .blot-formatter__toolbar-button svg {
     background: none !important;
+}
+
+.ql-table-button-disabled {
+    background-color: var(--quill-disabled-bg-color) !important;
+    color: var(--quill-disabled-fg-color) !important;
+    opacity: .4 !important;
 }
 
 .h1 {

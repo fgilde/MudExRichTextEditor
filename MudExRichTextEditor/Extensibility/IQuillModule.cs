@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
+using MudExRichTextEditor.Types;
 
 namespace MudExRichTextEditor.Extensibility;
 
@@ -45,4 +47,9 @@ public interface IQuillModule : IAsyncDisposable
     /// <param name="editor"></param>
     /// <returns></returns>
     Task OnCreatedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor);
+
+    /// <summary>
+    /// Extra tools that should be added to the toolbar.
+    /// </summary>
+    IEnumerable<QuillTool> Tools { get; }
 }

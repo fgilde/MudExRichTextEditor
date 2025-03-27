@@ -50,18 +50,18 @@ public class QuillTool
 
     public static IEnumerable<QuillTool> All()
     {
-        yield return new QuillTool(cls: "ql-header", group: 1, options: new string[] { "", "1", "2", "3", "4", "5", "6" });
+        yield return new QuillTool(cls: "ql-header", group: 1, options: ["", "1", "2", "3", "4", "5", "6"]);
         yield return new QuillTool(cls: "ql-bold", group: 2);
         yield return new QuillTool(cls: "ql-italic", group: 2);
         yield return new QuillTool(cls: "ql-underline", group: 2);
         yield return new QuillTool(cls: "ql-strike", group: 2);
-        yield return new QuillTool(cls: "ql-color", group: 3, options: Array.Empty<string>());
-        yield return new QuillTool(cls: "ql-background", group: 3, options: Array.Empty<string>());
+        yield return new QuillTool(cls: "ql-color", group: 3, options: []);
+        yield return new QuillTool(cls: "ql-background", group: 3, options: []);
         yield return new QuillTool(cls: "ql-list", group: 4, value: "ordered");
         yield return new QuillTool(cls: "ql-list", group: 4, value: "bullet");
         yield return new QuillTool(cls: "ql-indent", group: 4, value: "-1");
         yield return new QuillTool(cls: "ql-indent", group: 4, value: "+1");
-        yield return new QuillTool(cls: "ql-align", group: 4, options: new string[] { "", "center", "right", "justify" });
+        yield return new QuillTool(cls: "ql-align", group: 4, options: ["", "center", "right", "justify"]);
         yield return new QuillTool(cls: "ql-blockquote", group: 5);
         yield return new QuillTool(cls: "ql-code-block", group: 5);
         yield return new QuillTool(cls: "ql-link", group: 6);

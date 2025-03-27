@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
-@using MudBlazor.Extensions.Core
 @using MudBlazor.Extensions.Helper
 @using MudExRichTextEditor.Types
 @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseFormComponent<MudExRichTextEdit, string, string>
@@ -64,7 +63,7 @@ else
 
     private void DefaultToolbar(RenderTreeBuilder __builder)
     {
-        var groupedTools = Tools.GroupBy(t => t.Group).OrderBy(g => g.Key);
+        var groupedTools = ActiveTools.GroupBy(t => t.Group).OrderBy(g => g.Key);
 
         foreach (var group in groupedTools)
         {

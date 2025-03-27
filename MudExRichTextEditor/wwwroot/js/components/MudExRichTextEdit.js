@@ -7,12 +7,6 @@
     constructor(elementRef, dotNet, options) {
         this.elementRef = elementRef;
         this.dotnet = dotNet;
-        //Quill.register("modules/htmlEditButton", htmlEditButton);
-
-        Quill.register("modules/imageCompressor", imageCompressor);
-
-        if (window.QuillBlotFormatter && window.QuillBlotFormatter.default)
-            Quill.register('modules/blotFormatter', QuillBlotFormatter.default);
 
         this.create(this.options = options);
     }
@@ -213,17 +207,106 @@
         if (!resize || resize === 'none') {
             return;
         }
+        
+        this.adjustPos(this.elementRef.querySelector('.ql-tooltip'));
+        this.adjustPos(this.elementRef.querySelector('.ql-cell-properties-form'));
+        this.adjustPos(this.elementRef.querySelector('.ql-table-properties-form'));
+    }
 
-        var tooltip = this.elementRef.querySelector('.ql-tooltip');
-        if (tooltip) {
-            var leftVal = parseInt(window.getComputedStyle(tooltip).left, 10),
-                topVal = parseInt(window.getComputedStyle(tooltip).top, 10);
-            if (leftVal < 0) {
-                tooltip.style.left = '0px';
+    adjustPos(element) {
+        if (!element) return;
+        if (element.dataset.mouseIsDown) {
+            return;
+        }
+        const computedStyle = window.getComputedStyle(element);
+        const position = computedStyle.position;
+        if (position === "absolute" || position === "fixed") {
+            const parent = element.parentElement;
+            if (parent) {
+                const parentRect = parent.getBoundingClientRect();
+                const elRect = element.getBoundingClientRect();
+                if (
+                    elRect.left < parentRect.left ||
+                    elRect.top < parentRect.top ||
+                    elRect.right > parentRect.right ||
+                    elRect.bottom > parentRect.bottom
+                ) {
+                    element.style.left = "0";
+                }
             }
-            if (topVal < 10) {
-                tooltip.style.top = '10px';
-            }
+        }
+
+        if (!element.dataset.dragAttached) {
+            element.dataset.dragAttached = "true";
+
+            element.addEventListener("mousedown", function onMouseDown(e) {
+
+                const computedStyle = window.getComputedStyle(element);
+                const resizeProp = computedStyle.resize;
+                const threshold = 10; // Pixel als Schwellwert
+                let isResizing = false;
+                if (resizeProp !== "none") {
+                    // Wenn horizontales oder beides (horizontal + vertikal) Resizing aktiv ist,
+                    // prüfen wir, ob der Klick nahe dem rechten Rand liegt.
+                    if ((resizeProp === "both" || resizeProp === "horizontal") &&
+                        (e.offsetX > element.offsetWidth - threshold)) {
+                        isResizing = true;
+                    }
+                    // Wenn vertikales oder beides aktiv ist, prüfen wir den unteren Rand.
+                    if ((resizeProp === "both" || resizeProp === "vertical") &&
+                        (e.offsetY > element.offsetHeight - threshold)) {
+                        isResizing = true;
+                    }
+                }
+                // Falls der Klick im Resize-Bereich erfolgte, nichts weiter machen – native Resize bleibt aktiv.
+                if (isResizing) {
+                    return;
+                }
+
+                element.dataset.mouseIsDown = true;
+                e.preventDefault();
+
+                // Start der Positionsberechnung
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const initialLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
+                const initialTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
+                const offsetX = startX - initialLeft;
+                const offsetY = startY - initialTop;
+
+                function onMouseMove(e) {
+                    let newLeft = e.clientX - offsetX;
+                    let newTop = e.clientY - offsetY;
+
+                    // Optional: Begrenzung innerhalb des Parent-Elements
+                    if (element.parentElement) {
+                        const parentRect = element.parentElement.getBoundingClientRect();
+                        const elRect = element.getBoundingClientRect();
+                        const elementWidth = elRect.width;
+                        const elementHeight = elRect.height;
+
+                        if (newLeft < 0) newLeft = 0;
+                        if (newTop < 0) newTop = 0;
+                        if (newLeft + elementWidth > parentRect.width) {
+                            newLeft = parentRect.width - elementWidth;
+                        }
+                        if (newTop + elementHeight > parentRect.height) {
+                            newTop = parentRect.height - elementHeight;
+                        }
+                    }
+                    element.style.left = newLeft + "px";
+                    element.style.top = newTop + "px";
+                }
+
+                function onMouseUp() {
+                    element.dataset.mouseIsDown = false;
+                    document.removeEventListener("mousemove", onMouseMove);
+                    document.removeEventListener("mouseup", onMouseUp);
+                }
+
+                document.addEventListener("mousemove", onMouseMove);
+                document.addEventListener("mouseup", onMouseUp);
+            });
         }
     }
 

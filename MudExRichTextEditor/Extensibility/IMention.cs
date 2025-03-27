@@ -1,4 +1,4 @@
-﻿namespace MudExRichTextEditor.Extensibility.Mention;
+﻿namespace MudExRichTextEditor.Extensibility;
 
 public class Mention<TData>
 {

@@ -17,8 +17,6 @@ using MudBlazor.Extensions.Options;
 using Nextended.Blazor.Models;
 using Microsoft.AspNetCore.Components.Web;
 using MudExRichTextEditor.Extensibility;
-using MudExRichTextEditor.Extensibility.BlotFormatter;
-using MudExRichTextEditor.Extensibility.ImageCompressor;
 
 namespace MudExRichTextEditor;
 
@@ -44,13 +42,17 @@ public partial class MudExRichTextEdit
     #endregion
 
     private static string AssemblyVersion => typeof(MudExRichTextEdit).Assembly.GetName().Version.ToString();
-    public static string CacheBuster => "?c=" + AssemblyVersion;
+    public static string CacheBuster => $"?c={AssemblyVersion}{(Debugger.IsAttached ? Guid.NewGuid().ToFormattedId() : "")}";
 
     #region Parameters
     private string[] _preInitParameters;
 
     private bool IsOverwritten(string paramName) => _preInitParameters?.Contains(paramName) == true;
-    private IQuillModule[] _defaultModules = { new QuillBlotFormatterModule(), new QuillImageCompressorModule() };
+    
+    /// <summary>
+    /// Is this is true, the editor will always add the recommended modules to <see cref="Modules"/>
+    /// </summary>
+    [Parameter] public bool AlwaysUseRecommendedModules { get; set; } = true;
 
     [Parameter] public IQuillModule[] Modules { get; set; }
 
@@ -95,6 +97,8 @@ public partial class MudExRichTextEdit
     [Parameter] public EventCallback OnBeforeDialogOpen { get; set; }
     [Parameter] public EventCallback OnDialogClosed { get; set; }
 
+    [Parameter] public GetHtmlBehavior ValueHtmlBehavior { get; set; } = GetHtmlBehavior.SemanticHtml;
+
     [Parameter]
     public string Value
     {
@@ -110,20 +114,47 @@ public partial class MudExRichTextEdit
 
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
-    public IEnumerable<IQuillModule> AllModules => _defaultModules.Concat(Modules ?? Enumerable.Empty<IQuillModule>());
+    public IEnumerable<IQuillModule> AllModules => (Modules ?? Enumerable.Empty<IQuillModule>()).Concat(AlwaysUseRecommendedModules ? QuillModules.RecommendedModules : []).DistinctBy(m => m.GetType());
 
     #endregion
 
+    public Task<string> GetValue(GetHtmlBehavior behavior) => behavior switch
+    {
+        GetHtmlBehavior.SemanticHtml => GetSemanticHTML(),
+        GetHtmlBehavior.InnerHtml => GetHtml(),
+        GetHtmlBehavior.Text => GetText(),
+        GetHtmlBehavior.Content => GetContent(),
+        _ => GetHtml()
+    };
 
+    public Task<string> GetHtml(bool semantic) 
+        => semantic ? GetSemanticHTML() : GetHtml();
+
+    /// <summary>
+    /// Returns the current HTML content of the editor.
+    /// </summary>
     public async Task<string> GetHtml()
         => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.root?.innerHTML, ElementReference);
+
+    /// <summary>
+    /// Returns the current semantic HTML content of the editor.
+    /// </summary>
+    public async Task<string> GetSemanticHTML()
+        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.getSemanticHTML(), ElementReference);
+
+    /// <summary>
+    /// Sets the HTML content of the editor.
+    /// </summary>
     public async Task<string> SetHtml(string html)
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement, html) =>
+    {
+        return await JsRuntime.DInvokeAsync<string>((_, quillElement, html) =>
         {
             if (quillElement?.__quill?.root)
                 return quillElement.__quill.root.innerHTML = html;
             return null;
         }, ElementReference, html);
+    }
+
     public async Task<string> GetText()
         => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.getText(), ElementReference);
     public async Task<string> GetContent()
@@ -168,6 +199,8 @@ public partial class MudExRichTextEdit
             }).ToArray();
     }
 
+    private QuillTool[] ActiveTools => Tools.Concat(AllModules.SelectMany(module => module?.Tools ?? []).Where(t => t is not null)).ToArray();
+
     [JSInvokable]
     public void OnHeightChanged(double height)
     {
@@ -175,10 +208,10 @@ public partial class MudExRichTextEdit
     }
 
     [JSInvokable]
-    public void OnContentChanged(string content, string source)
+    public async Task OnContentChanged(string content, string source)
     {
         if (Immediate || (content.IsNullOrWhiteSpace() && !_value.IsNullOrWhiteSpace()) || (!content.IsNullOrWhiteSpace() && _value.IsNullOrWhiteSpace()))
-            SetValueBackingField(content);
+            await RaiseValueChangeForCurrentValue();
     }
 
 
@@ -189,11 +222,10 @@ public partial class MudExRichTextEdit
 
 
     [JSInvokable]
-    public void OnBlur(string content, string source)
+    public async Task OnBlur(string content, string source)
     {
-        Console.WriteLine("onblur");
         if (!Immediate)
-            SetValueBackingField(content);
+            await RaiseValueChangeForCurrentValue();
     }
 
     [JSInvokable]
@@ -207,7 +239,7 @@ public partial class MudExRichTextEdit
 
     public async Task RaiseValueChangeForCurrentValue()
     {
-        var content = await GetHtml();
+        var content = await GetValue(ValueHtmlBehavior);
         SetValueBackingField(content);
     }
 
@@ -284,7 +316,6 @@ public partial class MudExRichTextEdit
             $"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css{CacheBuster}",
             $"./_content/MudExRichTextEditor/lib/quill/quill.snow.css{CacheBuster}",
             $"./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css{CacheBuster}",
-            //"./_content/MudExRichTextEditor/modules/quill-blot-formatter.min.js",
             $"./_content/MudExRichTextEditor/lib/quill/quill.js{CacheBuster}"
         );
 
@@ -307,8 +338,8 @@ public partial class MudExRichTextEdit
         foreach (var quillModule in AllModules)
         {
             await Task.WhenAll(
-                JsRuntime.LoadFilesAsync(quillModule.CssFiles),
-                JsRuntime.LoadFilesAsync(quillModule.JsFiles)
+                JsRuntime.LoadFilesAsync(quillModule.CssFiles.Where(s => !string.IsNullOrEmpty(s)).Select(s => $"{s}{CacheBuster}").ToArray()),
+                JsRuntime.LoadFilesAsync(quillModule.JsFiles.Where(s => !string.IsNullOrEmpty(s)).Select(s => $"{s}{CacheBuster}").ToArray())
             );
             var reference = await quillModule.OnLoadedAsync(JsRuntime, this);
             _jsQuillModuleConfigs.Add(new

@@ -1,94 +1,97 @@
 ﻿@page "/"
 @using MudExRichTextEditor.Extensibility
-@using MudExRichTextEditor.Extensibility.Mention
 @using Nextended.Core.Extensions
 @using BlazorJS
+@using MudExRichTextEditor.Types
 @using Newtonsoft.Json
 @using Nextended.Blazor.Models
 
-<MudToolBar>
-    <MudCheckBox Label="Read only" @bind-Value="_readOnly" />
-    <MudCheckBox Label="Update Value on change" @bind-Value="_updateValueOnChange" />
-</MudToolBar>
+<MudPaper Class="m-2">
+    <MudToolBar>
+        <MudCheckBox Label="Read only" @bind-Value="_readOnly" />
+        <MudSpacer />
+        <MudButton OnClick="@(ShowUserMentions)">Show User Mentions</MudButton>
+        <MudButton OnClick="@(ShowTagMentions)">Show Tag Mentions</MudButton>
+    </MudToolBar>
 
-<MudExRichTextEdit @ref="_editor"
-                   Modules="@_modules"
-                   ReadOnly="@_readOnly"
-                   Immediate="@_updateValueOnChange"
-                   Height="400"
-                   EnableResize="true"
-                   CustomUploadFunc="OnUpload"
-                   Files="@_files"
-                   Class="m-2"
-                   @bind-Value="@_value"
-                   Placeholder="Write your shit right here">
+    <MudExRichTextEdit @ref="_editor"
+                       Modules="@_modules"
+                       ReadOnly="@_readOnly"
+                       Immediate="@_updateValueOnChange"
+                       Height="400"
+                       EnableResize="true"
+                       CustomUploadFunc="OnUpload"
+                       Files="@_files"
+                       Class="m-2"
+                       ValueHtmlBehavior="@_bindingMode"
+                       @bind-Value="@_value"
+                       Placeholder="@_placeholder">
 
-</MudExRichTextEdit>
+    </MudExRichTextEdit>
 
-<MudButton OnClick="@(() => { _value = "<b>MoIn</b>"; StateHasChanged(); })">Set Value to Moin</MudButton>
-<MudButton OnClick="@(() => {ShowUserMentions(); })">Show User Mentions</MudButton>
-<MudButton OnClick="@(() => {ShowTagMentions(); })">Show Tag Mentions</MudButton>
+    <MudExDivider Vertical="false" />
+    <MudToolBar Dense="true">
+        <MudExEnumSelect SearchBox="false" Label="Value Bind Mode" Clearable="false" TEnum="GetHtmlBehavior" @bind-Value="_bindingMode"></MudExEnumSelect>
+        <MudCheckBox Label="Update Value on change" @bind-Value="_updateValueOnChange" />
+    </MudToolBar>
 
-<textarea class="m-2" style="width: 100%; height: 400px;" readonly="readonly">@_value</textarea>
 
+    <textarea class="m-2" style="width: 95%; height: 400px;" readonly="readonly">@_value</textarea>
+</MudPaper>
 @code {
 
-    MudExRichTextEdit _editor;
-    bool _readOnly = false;
-    bool _updateValueOnChange;
-    string _value = "<b>This</b> initial value will change in 2 seconds";
+    private MudExRichTextEdit _editor;
+    private string _placeholder = "Write HTML content. Use @ for User mentions and # for Tag mentions";
+    private GetHtmlBehavior _bindingMode = GetHtmlBehavior.SemanticHtml;
+    private bool _readOnly;
+    private bool _updateValueOnChange;
+    private string _value = "<b>This</b> initial value will change in 2 seconds";
     private IQuillModule[] _modules;
-    [Inject]
-    private IJSRuntime _js { get; set; }
+    [Inject] private IJSRuntime _js { get; set; }
 
     protected override void OnInitialized()
     {
-        _modules = new IQuillModule[] {
+        _modules =
+        [
             new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$').SetProperties(m => m.MentionClicked = UserMentionClicked, m => m.AfterMentionSelect = AfterUserMentionSelect),
             new QuillMentionModule<Tag>((c, s) => Task.FromResult(_tags.Where(tag => tag.Name.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '#').SetProperties(m => m.MentionClicked = TagMentionClicked)
-    };
+        ];
         base.OnInitialized();
     }
 
-    private void AfterUserMentionSelect(User obj)
+    private Task AfterUserMentionSelect(User obj)
     {
         Console.WriteLine(obj.FullName);
+        return Task.CompletedTask;
     }
 
-    private async void TagMentionClicked(Tag obj)
-    {
-        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
-
-    }
+    private Task TagMentionClicked(Tag obj) => _js.AlertAsync(JsonConvert.SerializeObject(obj)).AsTask();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await Task.Delay(2000);
-            _value = "<b>This is the new value now </b> <a href=\"https://www.mudex.org\">mudex.org</a>";
+            _value = $$"""<p><strong>This is the new value now </strong></p><p> </p><p></p><div class="quill-better-table-wrapper"><table class="quill-better-table" style="width: 300px;"><colgroup><col width="100"><col width="100"><col width="100"></colgroup><tbody><tr data-row="row-4qws"><td data-row="row-4qws" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-4qws" data-cell="cell-70rc" data-rowspan="1" data-colspan="1"></p></td><td data-row="row-4qws" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-4qws" data-cell="cell-y7os" data-rowspan="1" data-colspan="1"></p></td><td data-row="row-4qws" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-4qws" data-cell="cell-w3wi" data-rowspan="1" data-colspan="1"></p></td></tr><tr data-row="row-t96w"><td data-row="row-t96w" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-t96w" data-cell="cell-u5hy" data-rowspan="1" data-colspan="1"></p></td><td data-row="row-t96w" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-t96w" data-cell="cell-zp3o" data-rowspan="1" data-colspan="1"></p><p class="qlbt-cell-line" data-row="row-t96w" data-cell="cell-zp3o" data-rowspan="1" data-colspan="1"></p></td><td data-row="row-t96w" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-t96w" data-cell="cell-ak20" data-rowspan="1" data-colspan="1"></p></td></tr><tr data-row="row-u347"><td data-row="row-u347" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-u347" data-cell="cell-dfiw" data-rowspan="1" data-colspan="1"></p></td><td data-row="row-u347" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-u347" data-cell="cell-zbi5" data-rowspan="1" data-colspan="1"></p></td><td data-row="row-u347" rowspan="1" colspan="1"><p class="qlbt-cell-line" data-row="row-u347" data-cell="cell-i171" data-rowspan="1" data-colspan="1"></p></td></tr></tbody></table></div><p></p><p></p><p><a href="https://www.mudex.org">mudex.org</a></p><p></p><p>Note: {{_placeholder}}""";
             StateHasChanged();
         }
     }
 
 
 
-    private async void UserMentionClicked(User obj)
-    {
-        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
-    }
+    private Task UserMentionClicked(User obj) => _js.AlertAsync(JsonConvert.SerializeObject(obj)).AsTask();
 
-    private IList<UploadableFile> _files = new List<UploadableFile>()
+    private readonly IList<UploadableFile> _files = new List<UploadableFile>()
     {
         new()
         {
-            Url = "https://mudex.azurewebsites.net/sample-data/logo.png",
+            Url = "https://www.mudex.org/sample-data/logo.png",
             FileName = "logo.png",
             ContentType = "image/png"
         },
         new()
         {
-            Url = "https://mudex.azurewebsites.net/sample-data/sample.pdf",
+            Url = "https://www.mudex.org/sample-data/sample.pdf",
             FileName = "sample.pdf",
             ContentType = "application/pdf"
         },
@@ -138,10 +141,6 @@
         await _js.AlertAsync(JsonConvert.SerializeObject(allTags.Select(mention => mention.Data)));
     }
 
-    private async Task<string> OnUpload(UploadableFile arg)
-    {        
-        // Here you can perform your custom upload
-        return await DataUrl.GetDataUrlAsync(arg.Data, arg.ContentType);        
-    }
+    private Task<string> OnUpload(UploadableFile arg) => DataUrl.GetDataUrlAsync(arg.Data, arg.ContentType);
 
 }
