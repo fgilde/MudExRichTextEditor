@@ -1,12 +1,9 @@
 ﻿@page "/"
 @using MudExRichTextEditor.Extensibility
-@using MudExRichTextEditor.Extensibility.Mention
 @using Nextended.Core.Extensions
 @using BlazorJS
 @using Microsoft.Extensions.Localization
-@using MudBlazor.Extensions.Components
 @using MudBlazor.Extensions.Helper
-@using MudExRichTextEditor
 @using Newtonsoft.Json
 @using Nextended.Blazor.Models
 @rendermode InteractiveServer
@@ -74,29 +71,24 @@
 
     protected override void OnInitialized()
     {
-        _modules = new IQuillModule[] {
+        _modules =
+        [
             new QuillMentionModule<User>((c, s) => Task.FromResult(_users.Where(user => user.FullName.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '@', '$').SetProperties(m => m.MentionClicked = UserMentionClicked, m => m.AfterMentionSelect = AfterUserMentionSelect),
             new QuillMentionModule<Tag>((c, s) => Task.FromResult(_tags.Where(tag => tag.Name.Contains(s, StringComparison.InvariantCultureIgnoreCase))), '#').SetProperties(m => m.MentionClicked = TagMentionClicked)
-        };
+        ];
         base.OnInitialized();
     }
 
-    private void AfterUserMentionSelect(User obj)
+    private Task AfterUserMentionSelect(User obj)
     {
         Console.WriteLine(obj.FullName);
+        return Task.CompletedTask;
     }
 
-    private async void TagMentionClicked(Tag obj)
-    {
-        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
-
-    }
+    private Task TagMentionClicked(Tag obj) => _js.AlertAsync(JsonConvert.SerializeObject(obj)).AsTask();
 
 
-    private async void UserMentionClicked(User obj)
-    {
-        await _js.AlertAsync(JsonConvert.SerializeObject(obj));
-    }
+    private Task UserMentionClicked(User obj) => _js.AlertAsync(JsonConvert.SerializeObject(obj)).AsTask();
 
     private IList<UploadableFile> _files = new List<UploadableFile>()
     {

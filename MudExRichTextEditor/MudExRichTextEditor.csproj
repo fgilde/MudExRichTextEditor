@@ -10,15 +10,14 @@
     <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>8.0.2</Version>
+    <Version>8.0.3</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>8.0.2</AssemblyVersion>
+    <AssemblyVersion>8.0.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Remove="bundleconfig.json" />
   </ItemGroup>
-
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />
