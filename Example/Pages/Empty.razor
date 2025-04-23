@@ -1,3 +1,20 @@
 ﻿@page "/empty"
+@inject IDialogService DialogService
+<MudButton OnClick="OpenEditor">Open Editor Dialog</MudButton>
 
-<p> Nothing here</p>
+
+@code {
+    private async Task OpenEditor()
+    {
+        var options = new DialogOptions
+        {
+            FullWidth = true,
+            MaxWidth = MaxWidth.ExtraLarge,
+            CloseButton = true,
+            CloseOnEscapeKey = true,
+            BackdropClick = false,
+        };
+
+        await DialogService.ShowExAsync<Index>("Editor", options);
+    }
+}

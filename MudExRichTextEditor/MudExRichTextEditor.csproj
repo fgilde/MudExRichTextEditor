@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="BlazorJS" Version="2.2.0" />    
-    <PackageReference Include="MudBlazor.Extensions" Version="8.3.0" />
+    <PackageReference Include="MudBlazor.Extensions" Version="8.5.2" />
   </ItemGroup>
 
   <ItemGroup>
