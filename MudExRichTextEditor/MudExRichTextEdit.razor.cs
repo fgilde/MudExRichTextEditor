@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.AspNetCore.Components;
@@ -53,6 +54,7 @@ public partial class MudExRichTextEdit
     /// Is this is true, the editor will always add the recommended modules to <see cref="Modules"/>
     /// </summary>
     [Parameter] public bool AlwaysUseRecommendedModules { get; set; } = true;
+    [Parameter] public bool UseCultureForSpeechRecognition { get; set; } = true;
 
     [Parameter] public IQuillModule[] Modules { get; set; }
 
@@ -398,9 +400,10 @@ public partial class MudExRichTextEdit
     }
 
     private async Task StartRecording()
-    {
-        _recording = await JsReference.InvokeAsync<bool>("startRecording");
+    {        
+        _recording = await JsReference.InvokeAsync<bool>("startRecording", UseCultureForSpeechRecognition ? Culture?.Name : null);
     }
+    
 
     private async Task StopRecording()
     {

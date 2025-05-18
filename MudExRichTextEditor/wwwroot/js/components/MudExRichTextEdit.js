@@ -164,11 +164,13 @@
         }
     }
 
-    startRecording() {
+    startRecording(lang) {
         if ('webkitSpeechRecognition' in window) {
             this.recognition = new webkitSpeechRecognition();
 
-            this.recognition.lang = 'de-DE';
+            if (lang) {                
+                this.recognition.lang = lang;
+            }
             this.recognition.continuous = true;
             this.recognition.interimResults = true;
 

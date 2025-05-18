@@ -1,0 +1,67 @@
+# Build and deploy ASP.Net Core app to Azure Web App - MudExRichTextEditorExample
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    env:
+      PUBLISH_DIR: myapp
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+
+      - name: Build with dotnet
+        run: dotnet build Example/MudExRichTextEditorExample.csproj --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish Example/MudExRichTextEditorExample.csproj -c Release -f net8.0 -o ${{ env.PUBLISH_DIR }}
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{ env.PUBLISH_DIR }}
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1D74AB99539D4695968FC64CCE715C3F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BE97374FA6874064872DF7D0D1429D08 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_54831D4D746248D99A5A43AA0895F4BD }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'MudExRichTextEditorExample'
+          slot-name: 'Production'
+          package: .
