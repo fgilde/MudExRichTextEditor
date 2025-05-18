@@ -315,7 +315,7 @@ public partial class MudExRichTextEdit
         await JsRuntime.LoadFilesAsync(
             $"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css{CacheBuster}",
             $"./_content/MudExRichTextEditor/lib/quill/quill.snow.css{CacheBuster}",
-            $"./_content/MudExRichTextEditor/lib/quill/quill.mudblazor.css{CacheBuster}",
+            $"./_content/MudExRichTextEditor/css/quill.mudblazor.css{CacheBuster}",
             $"./_content/MudExRichTextEditor/lib/quill/quill.js{CacheBuster}"
         );
 

@@ -34,7 +34,7 @@ public class QuillMentionModule<T> : QuillModule
     public IJSObjectReference ModuleReference { get; private set; }
 
     public override string[] JsFiles => [$"./_content/MudExRichTextEditor/modules/quill.mention.min.js{MudExRichTextEdit.CacheBuster}"];
-    public override string[] CssFiles => [$"./_content/MudExRichTextEditor/lib/quill/quill.mention.css{MudExRichTextEdit.CacheBuster}"];
+    public override string[] CssFiles => [$"./_content/MudExRichTextEditor/css/quill.mention.css{MudExRichTextEdit.CacheBuster}"];
 
     public override string JsConfigFunction => "__getMentionConfig";
 
