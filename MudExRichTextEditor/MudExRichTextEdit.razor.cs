@@ -196,8 +196,8 @@ public partial class MudExRichTextEdit
     {
         return QuillTool.All()
             .Concat(new[] {
-                new CustomTool((_, _) => AttachFilesAsync(), Icons.Material.Filled.AttachFile, "Insert file", Color.Inherit, 6 ),
-                new CustomTool((_, _) => _recording ? StopRecording() : StartRecording(), (_,_) => _recording ? Icons.Material.Filled.Stop : Icons.Material.Filled.Mic, (_,_) => _recording ? "Stop recording" : "Start recording", (_,_) => _recording ? Color.Warning : Color.Inherit)
+                new CustomTool((_, _) => AttachFilesAsync(), Icons.Material.Filled.AttachFile, TryLocalize("Insert file"), Color.Inherit, 6 ),
+                new CustomTool((_, _) => _recording ? StopRecording() : StartRecording(), (_,_) => _recording ? Icons.Material.Filled.Stop : Icons.Material.Filled.Mic, (_,_) => _recording ? TryLocalize("Stop recording") : TryLocalize("Start recording"), (_,_) => _recording ? Color.Warning : Color.Inherit)
             }).ToArray();
     }
 
