@@ -53,6 +53,7 @@ public partial class MudExRichTextEdit
     /// <summary>
     /// If this is true, the editor will always add the recommended modules to <see cref="Modules"/>, Explicit is better than implicit. Users should opt-in to extra features, not opt-out.
     /// </summary>
+    [Obsolete("Use QuillPresets instead for recommended configurations.")]
     [Parameter] public bool AlwaysUseRecommendedModules { get; set; } = false;
     [Parameter] public bool UseCultureForSpeechRecognition { get; set; } = true;
 
