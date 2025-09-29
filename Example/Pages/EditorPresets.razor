@@ -1,0 +1,66 @@
+﻿@page "/editor-presets"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Extensibility
+@using MudExRichTextEditor.Types
+
+<PageTitle>Editor Presets</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Editor Presets</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    Quick start examples using built-in presets for common scenarios.
+</MudText>
+
+<MudText Typo="Typo.h5" Class="mt-6 mb-2">Minimal Preset</MudText>
+<MudText Typo="Typo.body2" Class="mb-3">
+    Perfect for simple text formatting needs.
+</MudText>
+<MudExRichTextEdit @bind-Value="_minimal"
+                   Height="200"
+                   Tools="@_minimalTools"
+                   Modules="@_minimalModules"
+                   AlwaysUseRecommendedModules="false"
+                   Placeholder="Type here...">
+</MudExRichTextEdit>
+
+<MudDivider Class="my-6" />
+
+<MudText Typo="Typo.h5" Class="mb-2">Standard Preset</MudText>
+<MudText Typo="Typo.body2" Class="mb-3">
+    Great for blog posts, articles, and general content.
+</MudText>
+<MudExRichTextEdit @bind-Value="_standard"
+                   Height="200"
+                   Tools="@_standardTools"
+                   Modules="@_standardModules"
+                   AlwaysUseRecommendedModules="false"
+                   Placeholder="Write your article...">
+</MudExRichTextEdit>
+
+<MudDivider Class="my-6" />
+
+<MudText Typo="Typo.h5" Class="mb-2">Full Preset</MudText>
+<MudText Typo="Typo.body2" Class="mb-3">
+    Everything included - perfect for complex documents with tables and media.
+</MudText>
+<MudExRichTextEdit @bind-Value="_full"
+                   Height="200"
+                   Tools="@_fullTools"
+                   Modules="@_fullModules"
+                   AlwaysUseRecommendedModules="false"
+                   Placeholder="Create rich content...">
+</MudExRichTextEdit>
+
+@code {
+    private string _minimal = "<p>Simple and clean.</p>";
+    private string _standard = "<p>Perfect for most content needs.</p>";
+    private string _full = "<p>All features at your fingertips!</p>";
+
+    private QuillTool[] _minimalTools = QuillPresets.Minimal.Tools;
+    private IQuillModule[] _minimalModules = QuillPresets.Minimal.Modules;
+
+    private QuillTool[] _standardTools = QuillPresets.Standard.Tools;
+    private IQuillModule[] _standardModules = QuillPresets.Standard.Modules;
+
+    private QuillTool[] _fullTools = QuillPresets.Full.Tools;
+    private IQuillModule[] _fullModules = QuillPresets.Full.Modules;
+}

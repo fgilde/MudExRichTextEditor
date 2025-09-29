@@ -1,0 +1,70 @@
+﻿@page "/editor-custom"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Types
+@using MudExRichTextEditor.Extensibility
+
+<PageTitle>Custom Editor</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Custom Editor Configuration</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    Build your own custom editor by combining presets with additional tools and modules.
+</MudText>
+
+<MudPaper Class="pa-4 mb-4">
+    <MudText Typo="Typo.h6">This Example:</MudText>
+    <MudText Typo="Typo.body2">
+        Starting from the Standard preset, we've added table support and color tools.
+    </MudText>
+</MudPaper>
+
+<MudExRichTextEdit @bind-Value="_content"
+                   Height="400"
+                   Tools="@_tools"
+                   Modules="@_modules"
+                   AlwaysUseRecommendedModules="false"
+                   Placeholder="Customize your editor exactly how you need it...">
+</MudExRichTextEdit>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">Code Example:</MudText>
+    <MudText Typo="Typo.body2" Class="mt-2">
+        <pre style="background-color: #f5f5f5; padding: 16px; border-radius: 4px;">
+private QuillTool[] _tools = 
+[
+    ..QuillPresets.Standard.Tools,  // Start with standard
+    QuillTools.Color(),              // Add colors
+    QuillTools.Background(),         // Add background colors
+    QuillTools.TableButton(),        // Add tables
+];
+
+private IQuillModule[] _modules = 
+[
+    ..QuillPresets.Standard.Modules, // Standard modules
+    new QuillTableBetterModule(),    // Add table functionality
+];
+        </pre>
+    </MudText>
+</MudPaper>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">HTML Output:</MudText>
+    <pre style="max-height: 200px; overflow: auto;">@_content</pre>
+</MudPaper>
+
+@code {
+    private string _content = "<p>This is a <strong>custom configured</strong> editor.</p>";
+
+    private QuillTool[] _tools =
+    [
+        ..QuillPresets.Standard.Tools,  // Start with standard
+        QuillTools.Color(),              // Add colors
+        QuillTools.Background(),         // Add background colors
+        QuillTools.TableButton(),        // Add tables
+    ];
+
+    private IQuillModule[] _modules =
+    [
+        ..QuillPresets.Standard.Modules, // Standard modules
+        new QuillTableBetterModule(),    // Add table functionality
+    ];
+}

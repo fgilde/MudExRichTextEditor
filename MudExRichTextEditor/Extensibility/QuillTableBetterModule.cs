@@ -15,9 +15,10 @@ public class QuillTableBetterModule : QuillModule
         "./_content/MudExRichTextEditor/css/quill.table.better.mudblazor.css"
     ];
 
-    public override IEnumerable<QuillTool> Tools => [
-        new(cls: "ql-table-better", group: 7)
-    ];
+    // No auto-injection of tools. Module provides functionality only; button must be added explicitly via Tools parameter.
+    //public override IEnumerable<QuillTool> Tools => [
+    //    new(cls: "ql-table-better", group: 7)
+    //];
 
     public override string JsConfigFunction => $"__g{Id}";
 

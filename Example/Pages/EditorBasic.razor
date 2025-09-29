@@ -1,0 +1,40 @@
+﻿@page "/editor-basic"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Extensibility
+@using MudExRichTextEditor.Types
+
+<PageTitle>Basic Editor</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Basic Text Editor</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    A basic editor with common text formatting options and lists.
+</MudText>
+
+<MudExRichTextEdit @bind-Value="_content"
+                   Height="400"
+                   Tools="@_tools"
+                   Modules="@_modules"
+                   Placeholder="Write your content...">
+</MudExRichTextEdit>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">HTML Output:</MudText>
+    <pre style="max-height: 200px; overflow: auto;">@_content</pre>
+</MudPaper>
+
+@code {
+    private string _content = "<p>Welcome to the <strong>basic editor</strong>!</p>";
+
+    private QuillTool[] _tools =
+    [
+        QuillTools.Header(group: 1, options: ["", "1", "2", "3"]),
+        QuillTools.Bold(),
+        QuillTools.Italic(),
+        QuillTools.Underline(),
+        QuillTools.Strike(),
+        QuillTools.OrderedList(),
+        QuillTools.BulletList(),
+    ];
+
+    private IQuillModule[] _modules = [];
+}

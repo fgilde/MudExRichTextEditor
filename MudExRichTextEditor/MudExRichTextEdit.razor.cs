@@ -49,11 +49,11 @@ public partial class MudExRichTextEdit
     private string[] _preInitParameters;
 
     private bool IsOverwritten(string paramName) => _preInitParameters?.Contains(paramName) == true;
-    
+
     /// <summary>
-    /// Is this is true, the editor will always add the recommended modules to <see cref="Modules"/>
+    /// If this is true, the editor will always add the recommended modules to <see cref="Modules"/>, Explicit is better than implicit. Users should opt-in to extra features, not opt-out.
     /// </summary>
-    [Parameter] public bool AlwaysUseRecommendedModules { get; set; } = true;
+    [Parameter] public bool AlwaysUseRecommendedModules { get; set; } = false;
     [Parameter] public bool UseCultureForSpeechRecognition { get; set; } = true;
 
     [Parameter] public IQuillModule[] Modules { get; set; }
@@ -201,7 +201,7 @@ public partial class MudExRichTextEdit
             }).ToArray();
     }
 
-    private QuillTool[] ActiveTools => Tools.Concat(AllModules.SelectMany(module => module?.Tools ?? []).Where(t => t is not null)).ToArray();
+    private QuillTool[] ActiveTools => Tools ?? [];
 
     [JSInvokable]
     public void OnHeightChanged(double height)

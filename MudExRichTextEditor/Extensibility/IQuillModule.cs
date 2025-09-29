@@ -48,8 +48,11 @@ public interface IQuillModule : IAsyncDisposable
     /// <returns></returns>
     Task OnCreatedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor);
 
+    /*
+     * Remove this - modules shouldn't auto-inject tools
     /// <summary>
     /// Extra tools that should be added to the toolbar.
     /// </summary>
     IEnumerable<QuillTool> Tools { get; }
+    */
 }
