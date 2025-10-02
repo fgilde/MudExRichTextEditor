@@ -1,0 +1,45 @@
+﻿@page "/editor-standard"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Types
+@using MudExRichTextEditor.Extensibility
+
+<PageTitle>Standard Editor</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Standard Editor</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    A standard editor with formatting, lists, links, and image support with automatic compression.
+</MudText>
+
+<MudExRichTextEdit @bind-Value="_content"
+                   Height="400"
+                   Tools="@_tools"
+                   Modules="@_modules"
+                   Placeholder="Create rich content...">
+</MudExRichTextEdit>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">HTML Output:</MudText>
+    <pre style="max-height: 200px; overflow: auto;">@_content</pre>
+</MudPaper>
+
+@code {
+    private string _content = "<p>This editor includes <strong>image compression</strong> and more features.</p>";
+
+    private QuillTool[] _tools =
+    [
+        QuillTools.Header(group: 1, options: ["", "1", "2", "3"]),
+        QuillTools.Bold(),
+        QuillTools.Italic(),
+        QuillTools.Underline(),
+        QuillTools.Strike(),
+        QuillTools.OrderedList(),
+        QuillTools.BulletList(),
+        QuillTools.Link(),
+        QuillTools.Image(),
+    ];
+
+    private IQuillModule[] _modules =
+    [
+        new QuillImageCompressorModule(),
+    ];
+}

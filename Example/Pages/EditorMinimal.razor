@@ -1,0 +1,37 @@
+﻿@page "/editor-minimal"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Extensibility
+@using MudExRichTextEditor.Types
+
+<PageTitle>Minimal Editor</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Minimal Editor</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    A simple editor with only basic text formatting: bold, italic, underline, and strike-through.
+</MudText>
+
+<MudExRichTextEdit @bind-Value="_content"
+                   Height="400"
+                   Tools="@_tools"
+                   Modules="@_modules"
+                   Placeholder="Start typing...">
+</MudExRichTextEdit>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">HTML Output:</MudText>
+    <pre style="max-height: 200px; overflow: auto;">@_content</pre>
+</MudPaper>
+
+@code {
+    private string _content = "<p>This is a <strong>minimal</strong> editor example.</p>";
+
+    private QuillTool[] _tools =
+    [
+        QuillTools.Bold(),
+        QuillTools.Italic(),
+        QuillTools.Underline(),
+        QuillTools.Strike(),
+    ];
+
+    private IQuillModule[] _modules = [];
+}

@@ -1,0 +1,56 @@
+﻿@page "/editor-full"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Types
+@using MudExRichTextEditor.Extensibility
+
+<PageTitle>Full Featured Editor</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Full Featured Editor</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    A full-featured editor with all formatting options, tables, image editing, and more.
+</MudText>
+
+<MudExRichTextEdit @bind-Value="_content"
+                   Height="500"
+                   Tools="@_tools"
+                   Modules="@_modules"
+                   Placeholder="Create amazing content with tables and images...">
+</MudExRichTextEdit>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">HTML Output:</MudText>
+    <pre style="max-height: 200px; overflow: auto;">@_content</pre>
+</MudPaper>
+
+@code {
+    private string _content = "<h2>Full Featured Editor</h2><p>Try all the features including <strong>tables</strong>!</p>";
+
+    private QuillTool[] _tools =
+    [
+        QuillTools.Header(group: 1),
+        QuillTools.Bold(),
+        QuillTools.Italic(),
+        QuillTools.Underline(),
+        QuillTools.Strike(),
+        QuillTools.Color(),
+        QuillTools.Background(),
+        QuillTools.OrderedList(),
+        QuillTools.BulletList(),
+        QuillTools.IndentDecrease(),
+        QuillTools.IndentIncrease(),
+        QuillTools.Align(),
+        QuillTools.Blockquote(),
+        QuillTools.CodeBlock(),
+        QuillTools.Link(),
+        QuillTools.Image(),
+        QuillTools.Video(),
+        QuillTools.TableButton(),
+    ];
+
+    private IQuillModule[] _modules =
+    [
+        new QuillTableBetterModule(),
+        new QuillBlotFormatterModule(),
+        new QuillImageCompressorModule(),
+    ];
+}

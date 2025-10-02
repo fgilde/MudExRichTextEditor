@@ -40,7 +40,8 @@ public abstract class QuillModule: IQuillModule
         return OnModuleCreatedAsync(jsRuntime, editor);
     }
 
-    public virtual IEnumerable<QuillTool> Tools => [];
+    // Base class should match the interface - no auto-injection of tools.
+    //public virtual IEnumerable<QuillTool> Tools => [];
 
     protected virtual Task OnModuleCreatedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor) => Task.CompletedTask;
     protected virtual Task<IJSObjectReference> OnModuleLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor) => Task.FromResult<IJSObjectReference>(null);
