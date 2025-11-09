@@ -211,10 +211,10 @@ public partial class MudExRichTextEdit
     private QuillTool[] GetTools()
     {
         return QuillTool.All()
-            .Concat(new[] {
+            .Concat([
                 new CustomTool((_, _) => AttachFilesAsync(), Icons.Material.Filled.AttachFile, TryLocalize("Insert file"), Color.Inherit, 6 ),
                 new CustomTool((_, _) => _recording ? StopRecording() : StartRecording(), (_,_) => _recording ? Icons.Material.Filled.Stop : Icons.Material.Filled.Mic, (_,_) => _recording ? TryLocalize("Stop recording") : TryLocalize("Start recording"), (_,_) => _recording ? Color.Warning : Color.Inherit)
-            }).ToArray();
+            ]).ToArray();
     }
 
     private QuillTool[] ActiveTools => Tools ?? [];
@@ -222,9 +222,10 @@ public partial class MudExRichTextEdit
     [JSInvokable]
     public void OnHeightChanged(double? height)
     {
-
-        height ??= Height ?? 300;
-        _height = height - (ShouldHideToolbar() ? 0 : _toolBarHeight);
+        if (height is > 3)
+        {
+            _height = height + (ShouldHideToolbar() ? 0 : _toolBarHeight);
+        }
     }
 
     [JSInvokable]

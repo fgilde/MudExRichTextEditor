@@ -153,7 +153,7 @@
             });
             resizeObserver.observe(this.quill.root.parentNode);
 
-            // Add IntersectionObserver to handle visibility changes (e.g., when inside expansion panels)
+            
             const intersectionObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && entry.intersectionRatio > 0) {

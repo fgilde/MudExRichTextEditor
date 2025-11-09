@@ -44,6 +44,7 @@ public static class QuillPresets
 
         public static IQuillModule[] Modules =>
         [
+            new QuillTableBetterModule(),
             new QuillBlotFormatterModule(),
             new QuillImageCompressorModule(),
         ];
