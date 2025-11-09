@@ -1,0 +1,46 @@
+@page "/expansion-panel-test"
+@using MudExRichTextEditor
+
+<PageTitle>Expansion Panel Test</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">MudExRichTextEditor in ExpansionPanel Test</MudText>
+
+<MudText Class="mb-4">This page tests the fix for the issue where closing and reopening an expansion panel causes the RichTextEditor height to become 0px.</MudText>
+
+<MudText Typo="Typo.h6" Class="mb-2">Instructions:</MudText>
+<MudList Dense="true" Class="mb-4">
+    <MudListItem>1. Click on "Editor Panel 1" to expand it</MudListItem>
+    <MudListItem>2. Observe that the editor displays with correct height (200px)</MudListItem>
+    <MudListItem>3. Click on "Editor Panel 1" again to collapse it</MudListItem>
+    <MudListItem>4. Click on "Editor Panel 1" once more to expand it again</MudListItem>
+    <MudListItem>5. Verify that the editor still displays with correct height (should NOT be 0px)</MudListItem>
+</MudList>
+
+<MudExpansionPanels MultiExpansion="true">
+    <MudExpansionPanel Text="Editor Panel 1" Class="mb-2">
+        <MudExRichTextEdit @bind-Value="@_content1" 
+                           Height="200" 
+                           Placeholder="Type something here in panel 1..."/>
+    </MudExpansionPanel>
+    
+    <MudExpansionPanel Text="Editor Panel 2" Class="mb-2">
+        <MudExRichTextEdit @bind-Value="@_content2" 
+                           Height="150" 
+                           Placeholder="Type something here in panel 2..."/>
+    </MudExpansionPanel>
+    
+    <MudExpansionPanel Text="Normal Content" Class="mb-2">
+        <MudText>This is just normal content to test that the expansion panel itself works correctly.</MudText>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+<MudDivider Class="my-4" />
+
+<MudText Typo="Typo.h6">Content Values</MudText>
+<MudText>Panel 1 Content: @_content1</MudText>
+<MudText>Panel 2 Content: @_content2</MudText>
+
+@code {
+    private string _content1 = "<p>Initial content for editor 1</p>";
+    private string _content2 = "<p>Initial content for editor 2</p>";
+}

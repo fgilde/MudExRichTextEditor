@@ -152,6 +152,29 @@
                 }
             });
             resizeObserver.observe(this.quill.root.parentNode);
+
+            // Add IntersectionObserver to handle visibility changes (e.g., when inside expansion panels)
+            const intersectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio > 0) {
+                        // Element has become visible, update Quill's layout
+                        if (this.quill && this.quill.root) {
+                            // Force Quill to recalculate its bounds and update its layout
+                            this.quill.root.style.height = '';
+                            // Trigger a resize event to ensure proper dimensions
+                            setTimeout(() => {
+                                if (this.quill && this.quill.root && this.quill.root.parentNode) {
+                                    const height = this.quill.root.parentNode.getBoundingClientRect().height;
+                                    this.dotnet.invokeMethodAsync('OnHeightChanged', height);
+                                }
+                            }, 50);
+                        }
+                    }
+                });
+            }, { threshold: [0, 0.1] });
+            
+            this.intersectionObserver = intersectionObserver;
+            intersectionObserver.observe(this.quill.root.parentNode);
         }
 
         this.dotnet.invokeMethodAsync('OnCreated');
@@ -337,6 +360,10 @@
     dispose() {
         clearInterval(this.interval);
         this.stopRecording();
+        if (this.intersectionObserver) {
+            this.intersectionObserver.disconnect();
+            this.intersectionObserver = null;
+        }
     }
 }
 
