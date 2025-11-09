@@ -8,13 +8,15 @@
 <MudText Class="mb-4">This page tests the fix for the issue where closing and reopening an expansion panel causes the RichTextEditor height to become 0px.</MudText>
 
 <MudText Typo="Typo.h6" Class="mb-2">Instructions:</MudText>
-<MudList Dense="true" Class="mb-4">
-    <MudListItem>1. Click on "Editor Panel 1" to expand it</MudListItem>
-    <MudListItem>2. Observe that the editor displays with correct height (200px)</MudListItem>
-    <MudListItem>3. Click on "Editor Panel 1" again to collapse it</MudListItem>
-    <MudListItem>4. Click on "Editor Panel 1" once more to expand it again</MudListItem>
-    <MudListItem>5. Verify that the editor still displays with correct height (should NOT be 0px)</MudListItem>
-</MudList>
+<MudPaper Class="pa-4 mb-4">
+    <ol>
+        <li>Click on "Editor Panel 1" to expand it</li>
+        <li>Observe that the editor displays with correct height (200px)</li>
+        <li>Click on "Editor Panel 1" again to collapse it</li>
+        <li>Click on "Editor Panel 1" once more to expand it again</li>
+        <li>Verify that the editor still displays with correct height (should NOT be 0px)</li>
+    </ol>
+</MudPaper>
 
 <MudExpansionPanels MultiExpansion="true">
     <MudExpansionPanel Text="Editor Panel 1" Class="mb-2">
