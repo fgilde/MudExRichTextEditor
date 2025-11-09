@@ -205,9 +205,11 @@ public partial class MudExRichTextEdit
     private QuillTool[] ActiveTools => Tools ?? [];
 
     [JSInvokable]
-    public void OnHeightChanged(double height)
+    public void OnHeightChanged(double? height)
     {
-        _height = height + (ShouldHideToolbar() ? 0 : _toolBarHeight);
+
+        height ??= Height ?? 300;
+        _height = height - (ShouldHideToolbar() ? 0 : _toolBarHeight);
     }
 
     [JSInvokable]

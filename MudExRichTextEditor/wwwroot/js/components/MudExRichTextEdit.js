@@ -163,8 +163,8 @@
                             this.quill.root.style.height = '';
                             // Trigger a resize event to ensure proper dimensions
                             setTimeout(() => {
-                                if (this.quill && this.quill.root && this.quill.root.parentNode) {
-                                    const height = this.quill.root.parentNode.getBoundingClientRect().height;
+                                if (this.quill && this.quill.root && this.quill.root.parentNode) {                                    
+                                    const height = null; //this.quill.root.parentNode.getBoundingClientRect().height;
                                     this.dotnet.invokeMethodAsync('OnHeightChanged', height);
                                 }
                             }, 50);

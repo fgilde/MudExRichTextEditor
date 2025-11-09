@@ -4,6 +4,8 @@
 @inherits MudBlazor.Extensions.Components.Base.MudExJsRequiredBaseFormComponent<MudExRichTextEdit, string, string>
 @inject IJSRuntime JsRuntime
 
+<div style="@MudExStyleBuilder.Default.WithHeight(Height ?? 0, Height.HasValue).Build()">
+
 @if (_sourceLoaded)
 {
     <div class="@ClassStr()" style="@StyleStr()">
@@ -45,6 +47,8 @@ else
 
     </div>
 }
+
+</div>
 
 @code {
 
