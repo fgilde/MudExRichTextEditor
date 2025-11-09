@@ -18,6 +18,26 @@ Quill is a free, [open source](https://github.com/quilljs/quill/) WYSIWYG editor
 ![image](https://raw.githubusercontent.com/fgilde/MudExRichTextEditor/master/screen_re.png)
 
 
+## Features
+
+### Image Resizing
+Images inserted in the editor (including from attachments) can be resized directly by clicking on them. Resize handles will appear at the corners, allowing you to drag and adjust the image size. This feature is enabled by default in the **Standard** and **Full** presets via the `QuillBlotFormatterModule`.
+
+To enable image resizing in custom configurations, include the `QuillBlotFormatterModule`:
+
+```c#
+@using MudExRichTextEditor.Extensibility
+
+<MudExRichTextEdit Modules="@_modules" />
+
+@code {
+    private IQuillModule[] _modules = [
+        new QuillBlotFormatterModule(),
+        // other modules...
+    ];
+}
+```
+
 ## How to use
 
 1. Install the NuGet package [MudExRichTextEditor](https://www.nuget.org/packages/MudExRichTextEditor/)
