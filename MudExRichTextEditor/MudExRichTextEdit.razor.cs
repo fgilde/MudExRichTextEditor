@@ -35,6 +35,7 @@ public partial class MudExRichTextEdit
     private bool _initCalled = false;
     private bool _sourceLoaded = false;
     private bool _readOnly = false;
+    private TaskCompletionSource<bool> _initializationTcs = new TaskCompletionSource<bool>();
 
     private MudExSize<double>? _height;
     //internal ElementReference QuillElement;
@@ -150,6 +151,20 @@ public partial class MudExRichTextEdit
     /// </summary>
     public async Task<string> SetHtml(string html)
     {
+        // Wait for initialization to complete before attempting to set HTML
+        if (!_initialized)
+        {
+            // Wait for up to 10 seconds for initialization to complete
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
+            var completedTask = await Task.WhenAny(_initializationTcs.Task, timeoutTask);
+            
+            if (completedTask == timeoutTask)
+            {
+                // Initialization timed out, but still attempt to set HTML in case it works
+                System.Diagnostics.Debug.WriteLine("MudExRichTextEdit: SetHtml called before initialization completed. Attempting anyway.");
+            }
+        }
+
         return await JsRuntime.DInvokeAsync<string>((_, quillElement, html) =>
         {
             if (quillElement?.__quill?.root)
@@ -334,6 +349,7 @@ public partial class MudExRichTextEdit
             await SetHtml(_initialContent);
 
         _initialized = true;
+        _initializationTcs.TrySetResult(true);
     }
 
     protected virtual async Task LoadModules()
