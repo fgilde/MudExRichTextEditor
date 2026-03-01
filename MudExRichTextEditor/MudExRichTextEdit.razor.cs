@@ -332,27 +332,38 @@ public partial class MudExRichTextEdit
     private string GetPlaceholder() => ReadOnly ? string.Empty : TryLocalize(Placeholder);
 
     public override async Task ImportModuleAndCreateJsAsync()
-    {        
-        await JsRuntime.LoadFilesAsync(
-            $"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css{CacheBuster}",
-            $"./_content/MudExRichTextEditor/lib/quill/quill.snow.css{CacheBuster}",
-            $"./_content/MudExRichTextEditor/css/quill.mudblazor.css{CacheBuster}",
-            $"./_content/MudExRichTextEditor/lib/quill/quill.js{CacheBuster}"
-        );
+    {
+        try
+        {
+            await JsRuntime.LoadFilesAsync(
+                $"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css{CacheBuster}",
+                $"./_content/MudExRichTextEditor/lib/quill/quill.snow.css{CacheBuster}",
+                $"./_content/MudExRichTextEditor/css/quill.mudblazor.css{CacheBuster}",
+                $"./_content/MudExRichTextEditor/lib/quill/quill.js{CacheBuster}"
+            );
 
-        await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
-        await LoadModules();
-        //await JsRuntime.ImportModuleAsync($"https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js{CacheBuster}");
-        _sourceLoaded = true;
-        await InvokeAsync(StateHasChanged);
+            await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
+            await LoadModules();
+            //await JsRuntime.ImportModuleAsync($"https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js{CacheBuster}");
+            _sourceLoaded = true;
+            await InvokeAsync(StateHasChanged);
 
-        await base.ImportModuleAndCreateJsAsync();
+            await base.ImportModuleAndCreateJsAsync();
 
-        if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
-            await SetHtml(_initialContent);
+            if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
+                await SetHtml(_initialContent);
 
-        _initialized = true;
-        _initializationTcs.TrySetResult(true);
+            _initialized = true;
+            _initializationTcs.TrySetResult(true);
+        }
+        catch (Microsoft.JSInterop.JSDisconnectedException)
+        {
+            _initializationTcs.TrySetResult(false);
+        }
+        catch (ObjectDisposedException)
+        {
+            _initializationTcs.TrySetResult(false);
+        }
     }
 
     protected virtual async Task LoadModules()
