@@ -350,11 +350,12 @@ public partial class MudExRichTextEdit
 
             await base.ImportModuleAndCreateJsAsync();
 
+            _initializationTcs.TrySetResult(true);
+            
             if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
                 await SetHtml(_initialContent);
 
             _initialized = true;
-            _initializationTcs.TrySetResult(true);
         }
         catch (Microsoft.JSInterop.JSDisconnectedException)
         {
