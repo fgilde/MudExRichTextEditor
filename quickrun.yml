@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://fgilde.github.io/QuickRun/quickrun.schema.json
+name: MudExRichTextEditor — server demo
+description: "The server-side demo of the rich text editor."
+
+requires:
+  - tool: dotnet
+    version: ">=10.0"
+    install: https://dotnet.microsoft.com/download
+
+setup:
+  - run: dotnet restore
+
+tasks:
+  - name: app
+    run: dotnet run --project ServerSideExampleDemo --urls http://localhost:5084
+    readyWhen: {http: "http://localhost:5084"}
+    open: true
