@@ -2,6 +2,8 @@
 
 [NUGET PACKAGE](https://www.nuget.org/packages/MudExRichTextEditor/) | [LIVE DEMO](https://mudexrichtexteditorexample.azurewebsites.net/)
 
+[![QuickRun](https://quickrun.org/badge.svg)](https://quickrun.org/run?repo=fgilde/MudExRichTextEditor)
+
 MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project 
 Features with MudBlazor Theme Support. This compnent also works without a MudBlazor Project:
 
