@@ -9,7 +9,7 @@
     <PackageTags>blazor, blazor-component, blazor-webassembly, blazor-server, quill, MudBlazor, MudBlazor.Extensions</PackageTags>
     <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>9.4.0</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>$(Version)</AssemblyVersion>
