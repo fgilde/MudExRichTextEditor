@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Authors>Florian Gilde</Authors>
-    <PackageIconUrl />
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/fgilde/MudExRichTextEditor</RepositoryUrl>
     <PackageProjectUrl>https://github.com/fgilde/MudExRichTextEditor</PackageProjectUrl>
     <PackageTags>blazor, blazor-component, blazor-webassembly, blazor-server, quill, MudBlazor, MudBlazor.Extensions</PackageTags>
     <Description>MudExRichTextEditor is a custom reusable control that allows us to easily consume Quill combining in a MudBlazor project.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>9.5.0</Version>
+    <Version>9.5.1</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>$(Version)</AssemblyVersion>
   </PropertyGroup>
@@ -32,6 +32,10 @@
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
     <None Include="..\README.md">
       <Pack>True</Pack>

@@ -10,6 +10,7 @@ using MudBlazor;
 using MudExRichTextEditor.Types;
 using Nextended.Core.Extensions;
 using System.Linq;
+using System.Text.RegularExpressions;
 using MudBlazor.Extensions;
 using MudBlazor.Extensions.Components;
 using MudBlazor.Extensions.Core;
@@ -231,7 +232,7 @@ public partial class MudExRichTextEdit
     [JSInvokable]
     public async Task OnContentChanged(string content, string source)
     {
-        if (Immediate || (content.IsNullOrWhiteSpace() && !_value.IsNullOrWhiteSpace()) || (!content.IsNullOrWhiteSpace() && _value.IsNullOrWhiteSpace()))
+        if (Immediate || IsHtmlEmpty(content) != IsHtmlEmpty(_value))
             await RaiseValueChangeForCurrentValue();
     }
 
@@ -310,7 +311,23 @@ public partial class MudExRichTextEdit
 
     private bool ShouldHideToolbar() => HideToolbarWhenReadOnly && ReadOnly && Theme == QuillTheme.Snow;
 
-    protected override bool HasValue(string value) => !string.IsNullOrEmpty(value);
+    protected override bool HasValue(string value) => !IsHtmlEmpty(value);
+
+    private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
+    private static readonly Regex HtmlEmbedRegex = new(@"<\s*(img|iframe|video|audio|embed|object|svg|canvas|table|hr|input|picture|source)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Quill keeps markup for an empty document (&lt;p&gt;&lt;br&gt;&lt;/p&gt; or &lt;p&gt;&lt;/p&gt;), so a plain string check reports a value that is not there.
+    /// </summary>
+    internal static bool IsHtmlEmpty(string html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+            return true;
+        if (HtmlEmbedRegex.IsMatch(html))
+            return false;
+        var text = HtmlTagRegex.Replace(html, string.Empty).Replace("&nbsp;", " ");
+        return string.IsNullOrWhiteSpace(text);
+    }
 
     private object JsOptions()
     {

@@ -1,6 +1,6 @@
 # MudExRichTextEditor
 
-[NUGET PACKAGE](https://www.nuget.org/packages/MudExRichTextEditor/) | [LIVE DEMO](https://mudexrichtexteditorexample.azurewebsites.net/)
+[DOCUMENTATION](https://fgilde.github.io/MudExRichTextEditor/) ([DE](https://fgilde.github.io/MudExRichTextEditor/de/)) | [NUGET PACKAGE](https://www.nuget.org/packages/MudExRichTextEditor/) | [LIVE DEMO](https://mudexrichtexteditorexample.azurewebsites.net/)
 
 [![QuickRun](https://quickrun.org/badge.svg)](https://quickrun.org/run?repo=fgilde/MudExRichTextEditor)
 

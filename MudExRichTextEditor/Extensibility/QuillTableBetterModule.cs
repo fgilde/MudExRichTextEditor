@@ -8,7 +8,7 @@ namespace MudExRichTextEditor.Extensibility;
 public class QuillTableBetterModule : QuillModule
 {
 
-    public override string[] JsFiles => ["https://cdn.jsdelivr.net/npm/quill-table-better@1/dist/quill-table-better.js"];
+    public override string[] JsFiles => ["./_content/MudExRichTextEditor/modules/quill-table-better.js"];
     
     public override string[] CssFiles => [
         "./_content/MudExRichTextEditor/css/quill.table.better.css",

@@ -86,6 +86,19 @@ public static class QuillTools
     public static QuillTool Header(int group = 1, string[] options = null) =>
         new(cls: "ql-header", group: group, options: options ?? ["", "1", "2", "3", "4", "5", "6"]);
 
+    /// <summary>
+    /// Font family dropdown. Quill only renders the fonts in its own whitelist, so pass the same names you registered
+    /// via the "ql-font-&lt;name&gt;" css classes (see docs). Without options Quill's default whitelist is used.
+    /// </summary>
+    public static QuillTool Font(int group = 1, string[] fonts = null) =>
+        new(cls: "ql-font", group: group, options: fonts ?? ["", "serif", "monospace"]);
+
+    /// <summary>
+    /// Font size dropdown, using Quill's default size whitelist unless other options are passed.
+    /// </summary>
+    public static QuillTool Size(int group = 1, string[] sizes = null) =>
+        new(cls: "ql-size", group: group, options: sizes ?? ["small", "", "large", "huge"]);
+
     // Color Tools
     public static QuillTool Color(int group = 3, string[] colors = null) =>
         new(cls: "ql-color", group: group, options: colors ?? []);

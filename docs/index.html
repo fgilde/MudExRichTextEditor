@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MudExRichTextEditor — Quill rich text editor for Blazor & MudBlazor</title>
+<meta name="description" content="A reusable Blazor rich text editor built on Quill 2 with full MudBlazor theme support, custom toolbars, image resizing, tables, mentions and file uploads.">
+<meta property="og:title" content="MudExRichTextEditor — Quill rich text editor for Blazor & MudBlazor">
+<meta property="og:description" content="A reusable Blazor rich text editor built on Quill 2 with full MudBlazor theme support, custom toolbars, image resizing, tables, mentions and file uploads.">
+<meta property="og:image" content="assets/logo.png">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="alternate" hreflang="de" href="https://fgilde.github.io/MudExRichTextEditor/de/">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="" width="32" height="32">
+      <span>MudExRichTextEditor</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html#features">Features</a><a href="docs.html">Docs</a><a href="https://mudexrichtexteditorexample.azurewebsites.net/" rel="noopener">Live demo</a><a href="https://github.com/fgilde/MudExRichTextEditor" rel="noopener">GitHub</a>
+      <span class="lang-switch">
+        <a href="index.html" hreflang="en" aria-current="true">EN</a>
+        <a href="de/index.html" hreflang="de" aria-current="false">DE</a>
+      </span>
+      <button class="btn-ghost" data-theme-toggle type="button" aria-pressed="false" aria-label="Toggle dark mode">
+        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Blazor component · .NET 8, 9 &amp; 10</span>
+        <h1>A <span class="grad">rich text editor</span><br>that feels like MudBlazor</h1>
+        <p class="lead">MudExRichTextEditor wraps Quill 2 in a Blazor component that respects your MudBlazor theme, binds like any other input and ships with tables, mentions, image resizing, file attachments and speech-to-text. Works in WebAssembly and Server — and without MudBlazor too.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="docs.html"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg> Read the docs</a>
+          <a class="btn btn-secondary" href="https://mudexrichtexteditorexample.azurewebsites.net/" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4V8Z"/></svg> Live demo</a>
+          <a class="btn btn-secondary" href="https://github.com/fgilde/MudExRichTextEditor" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.4.5-.7 1.1-.8 1.7-.1.6-.1 1.2 0 1.8v4"/><path d="M9 18c-4.5 2-5-2-7-2"/></svg> GitHub</a>
+        </div>
+        <p class="badges">
+          <a href="https://www.nuget.org/packages/MudExRichTextEditor/" rel="noopener"><img src="https://img.shields.io/nuget/v/MudExRichTextEditor?color=10909d&amp;label=NuGet" alt="NuGet version" width="112" height="20" loading="lazy"></a>
+          <a href="https://www.nuget.org/packages/MudExRichTextEditor/" rel="noopener"><img src="https://img.shields.io/nuget/dt/MudExRichTextEditor?color=21cfbd&amp;label=downloads" alt="NuGet downloads" width="130" height="20" loading="lazy"></a>
+          <a href="https://github.com/fgilde/MudExRichTextEditor/blob/master/LICENSE" rel="noopener"><img src="https://img.shields.io/badge/license-MIT-ebb935" alt="MIT license" width="98" height="20" loading="lazy"></a>
+        </p>
+      </div>
+      <div class="hero-art">
+        <img class="hero-logo" src="assets/logo.png" alt="" width="92" height="92">
+        <img src="assets/screenshot.png" alt="Screenshot of the editor with its toolbar" width="1597" height="1203" loading="lazy">
+      </div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Everything the editor already does</h2>
+        <p>No wrapper gymnastics: parameters, two-way binding and form validation behave the way you expect from a Blazor input.</p>
+      </div>
+      <div class="grid">
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg></div>
+          <h3>Real two-way binding</h3>
+          <p><code>@bind-Value</code> works like on any input — including <code>Required</code> validation inside a <code>MudForm</code>.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2a10 10 0 0 0 0 20 2 2 0 0 0 2-2v-1a2 2 0 0 1 2-2h2a4 4 0 0 0 4-4 10 10 0 0 0-10-11Z"/></svg></div>
+          <h3>MudBlazor theming</h3>
+          <p>Toolbar and editor surface follow your palette: light, dark and custom colors included.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg></div>
+          <h3>Image resizing</h3>
+          <p>Click any image to get resize handles. Pasted and dropped images can be compressed automatically.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+          <h3>Tables</h3>
+          <p>Full table editing via <code>QuillTableBetterModule</code> — insert, merge, style and delete cells.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg></div>
+          <h3>Mentions</h3>
+          <p>Typed <code>QuillMentionModule&lt;T&gt;</code> with async suggestion lookup and click/hover callbacks.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4"/></svg></div>
+          <h3>Speech to text</h3>
+          <p>A built-in microphone tool dictates straight into the document, using the component culture.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+          <h3>File attachments</h3>
+          <p>Drop in a file dialog with upload hooks — return your own URL or let the editor inline a data URL.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v2h2a2 2 0 1 1 0 4h-2v4a2 2 0 0 1-2 2h-4v-2a2 2 0 1 0-4 0v2H6a2 2 0 0 1-2-2v-4H2a2 2 0 1 1 0-4h2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2Z"/></svg></div>
+          <h3>Pluggable modules</h3>
+          <p>Add any Quill module by implementing <code>IQuillModule</code>: JS, CSS and config in one class.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="quickstart">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Three steps to a running editor</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal">
+          <h3>Install the package</h3>
+          <pre><code>dotnet add package MudExRichTextEditor</code></pre>
+        </li>
+        <li class="reveal">
+          <h3>Add the using to <code>_Imports.razor</code></h3>
+          <pre><code>@using MudExRichTextEditor</code></pre>
+        </li>
+        <li class="reveal">
+          <h3>Drop the component on a page</h3>
+          <pre><code>@page "/"
+
+&lt;MudExRichTextEdit @bind-Value="_html" Height="320" /&gt;
+
+@code {
+    private string _html = "&lt;p&gt;Hello &lt;b&gt;MudBlazor&lt;/b&gt;!&lt;/p&gt;";
+}</code></pre>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="presets">
+    <div class="wrap split">
+      <div>
+        <h2>Start from a preset, not from scratch</h2>
+        <p style="color:var(--fg-muted)"><code>QuillPresets</code> bundles a matching toolbar and module set. <strong>Minimal</strong> is plain text formatting, <strong>Standard</strong> adds lists, links and images with compression, <strong>Full</strong> turns on colors, alignment, video and tables.</p>
+        <p><a href="docs.html#presets">Preset reference &rarr;</a></p>
+        <h3 style="margin-top:var(--space-5)">Fully self-hostable</h3>
+        <p style="color:var(--fg-muted)">Every script and stylesheet is served from <code>_content/MudExRichTextEditor</code>. Since 9.5.1 the table module is bundled too, so no request ever leaves your host — air-gapped and locked-down environments work out of the box.</p>
+      </div>
+      <div>
+        <pre><code>@using MudExRichTextEditor.Types
+
+&lt;MudExRichTextEdit @bind-Value="_html"
+                   Tools="@QuillPresets.Standard.Tools"
+                   Modules="@QuillPresets.Standard.Modules"
+                   Height="360"
+                   Immediate="true" /&gt;</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="modules">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Modules you can switch on</h2>
+      </div>
+      <div class="grid">
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg></div>
+          <h3>QuillBlotFormatterModule</h3>
+          <p>Click-to-resize handles for images and embeds.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L7 21"/></svg></div>
+          <h3>QuillImageCompressorModule</h3>
+          <p>Downscales pasted and dropped images before they hit your storage.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+          <h3>QuillTableBetterModule</h3>
+          <p>Tables with a context menu for rows, columns, merging and cell styling.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg></div>
+          <h3>QuillMentionModule&lt;T&gt;</h3>
+          <p>Async mention lookup over your own type, with several denotation chars.</p>
+        </article>
+      </div>
+      <div style="margin-top:var(--space-4)">
+        <pre><code>@using MudExRichTextEditor.Extensibility
+
+&lt;MudExRichTextEdit @bind-Value="_html" Modules="@_modules" /&gt;
+
+@code {
+    private IQuillModule[] _modules = [
+        new QuillBlotFormatterModule(),   // resize images by clicking them
+        new QuillImageCompressorModule(), // shrink pasted/dropped images
+        new QuillTableBetterModule(),     // tables (needs QuillTools.TableButton())
+    ];
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="cta reveal">
+        <h2>Ready to try it?</h2>
+        <p>Install from NuGet, or open the live demo and poke at every toolbar button first.</p>
+        <div class="hero-actions" style="justify-content:center">
+          <a class="btn btn-secondary" href="https://www.nuget.org/packages/MudExRichTextEditor/" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg> NuGet</a>
+          <a class="btn btn-secondary" href="docs.html"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg> Read the docs</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="index.html">
+          <img src="assets/logo.png" alt="" width="32" height="32">
+          <span>MudExRichTextEditor</span>
+        </a>
+        <p style="color:var(--fg-muted);font-size:.92rem;margin-top:var(--space-3);max-width:34ch">Quill 2, wrapped in a Blazor component that plays well with MudBlazor.</p>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="docs.html">Documentation</a>
+        <a href="https://github.com/fgilde/MudExRichTextEditor" rel="noopener">GitHub</a>
+        <a href="https://www.nuget.org/packages/MudExRichTextEditor/" rel="noopener">NuGet</a>
+        <a href="https://github.com/fgilde/MudExRichTextEditor/issues" rel="noopener">Issues</a>
+      </div>
+      <div>
+        <h4>Partners</h4>
+        <div class="partners">
+          <a class="partner" href="https://gilde.org" rel="noopener">
+            <svg class="gilde-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><defs><linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe6a8"/><stop offset="0.45" stop-color="#e0a24e"/><stop offset="1" stop-color="#a9761f"/></linearGradient></defs><g fill="none" stroke="url(#gGold)" stroke-width="56" stroke-linecap="square" stroke-linejoin="miter"><path d="M376 88H112v264l144 112 144-112v-96H280" pathLength="1"/><path d="M280 216h120" pathLength="1"/></g></svg>
+            <span>gilde.org</span>
+          </a>
+          <a class="partner" href="https://www.mudex.org" rel="noopener">
+            <img src="assets/mudex-logo.png" alt="" width="30" height="30" loading="lazy">
+            <span>mudex.org</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© Florian Gilde</span>
+      <span>MIT License</span>
+    </div>
+  </div>
+</footer>
+<script src="assets/site.js" defer></script>
+</body>
+</html>
