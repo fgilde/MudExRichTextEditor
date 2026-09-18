@@ -251,6 +251,8 @@
 }</code></pre>
       <p>The module also exposes <code>MentionClicked</code>, <code>MentionHovered</code>,
       <code>BeforeMentionSelect</code> and <code>AfterMentionSelect</code> callbacks.</p>
+      <p>The suggestion list is positioned with quill-mention's <code>fixed</code> strategy, so it lands at the caret
+      even inside a <code>MudDialog</code> or any scrolled or transformed parent.</p>
     </section>
     <section id="uploads">
       <h2>Files &amp; uploads</h2>
@@ -299,6 +301,9 @@
       <div class="note"><p>Quill keeps an empty document as <code>&lt;p&gt;&lt;br&gt;&lt;/p&gt;</code>. The component treats
       markup without text or embeds as empty, so validation and <code>ValueChanged</code> behave correctly when the user
       clears the field.</p></div>
+      <div class="note info"><p>Incoming markup runs through Quill's own converter, which is what keeps
+      <code>&lt;pre&gt;</code>, <code>&lt;ul&gt;</code>/<code>&lt;li&gt;</code> and nested inline formatting intact.
+      Anything Quill has no blot for is still dropped — register a custom blot if you need it.</p></div>
     </section>
     <section id="appearance">
       <h2>Themes &amp; appearance</h2>
@@ -353,9 +358,14 @@
       <p>Yes. The package brings its own MudBlazor dependency; you do not have to build the rest of your app with it.</p>
       <h3>How do I get true HTML instead of Quill markup?</h3>
       <p>Use the default <code>GetHtmlBehavior.SemanticHtml</code>, or call <code>GetSemanticHTML()</code>.</p>
-      <h3>Images are inserted twice on drag &amp; drop</h3>
-      <p>Use either the image compressor module or your own drop handling, not both — two handlers inserting the same
-      file is the usual cause.</p>
+      <h3>Why does my markup come back changed?</h3>
+      <p>Markup you assign to <code>Value</code> is parsed by Quill, so it is normalized to what Quill can actually
+      represent: <code>&lt;b&gt;</code> becomes <code>&lt;strong&gt;</code>, <code>&lt;pre&gt;</code> becomes a code block,
+      list items get Quill's own attributes. The semantic HTML you read back is equivalent, not byte-identical.</p>
+      <h3>Drag &amp; drop and paste</h3>
+      <p>The component handles both itself and inserts the file exactly once, at the drop position. Do not add your own
+      <code>drop</code> or <code>paste</code> handler on the editor root for files — that is what causes duplicate
+      images.</p>
     </section>
   </div>
 </main>
@@ -381,11 +391,11 @@
         <div class="partners">
           <a class="partner" href="https://gilde.org" rel="noopener">
             <svg class="gilde-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><defs><linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe6a8"/><stop offset="0.45" stop-color="#e0a24e"/><stop offset="1" stop-color="#a9761f"/></linearGradient></defs><g fill="none" stroke="url(#gGold)" stroke-width="56" stroke-linecap="square" stroke-linejoin="miter"><path d="M376 88H112v264l144 112 144-112v-96H280" pathLength="1"/><path d="M280 216h120" pathLength="1"/></g></svg>
-            <span>gilde.org</span>
+            <span><b>Gilde</b><small>gilde.org</small></span>
           </a>
           <a class="partner" href="https://www.mudex.org" rel="noopener">
-            <img src="assets/mudex-logo.png" alt="" width="30" height="30" loading="lazy">
-            <span>mudex.org</span>
+            <img src="assets/mudex-logo.png" alt="" width="40" height="40" loading="lazy">
+            <span><b>MudBlazor.Extensions</b><small>mudex.org</small></span>
           </a>
         </div>
       </div>

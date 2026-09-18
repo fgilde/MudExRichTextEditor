@@ -22,8 +22,17 @@
             theme: opt.theme
         };
 
-        if (!opt.quillElement && !this.elementRef) {
+        const host = opt.quillElement || this.elementRef;
+        if (!host) {
             return;
+        }
+
+        // A re-render can hand us an element that already carries a Quill instance.
+        // Building a second one on top of it throws deep inside Quill, so drop the old one first.
+        if (host.__quill) {
+            host.mudRichTextEdit?.dispose();
+            host.innerHTML = '';
+            host.__quill = host.quill = host.mudRichTextEdit = null;
         }
 
         if (opt.modules && opt.modules.length) {
@@ -36,84 +45,45 @@
             });
         }
 
-        this.quill = new Quill(opt.quillElement || this.elementRef, options);
-        this.__quill = this.__quill || this.quill;
-        opt.quillElement.__quill = this.__quill;
-        opt.quillElement.quill = this.quill;
-        opt.quillElement.mudRichTextEdit = this;
+        this.quill = new Quill(host, options);
+        this.__quill = this.quill;
+        this.host = host;
+        host.__quill = this.quill;
+        host.quill = this.quill;
+        host.mudRichTextEdit = this;
 
         if (opt.beforeUpload && !opt.defaultToolHandlerNames?.includes('image')) {
             this.quill.getModule('toolbar').addHandler('image', () => {
+                const index = this.quill.getSelection()?.index;
                 const input = document.createElement('input');
                 input.setAttribute('type', 'file');
                 input.setAttribute('accept', 'image/*');
-                input.click();
-
-                input.onchange = (a) => {
-                    const file = input.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const arrayBuffer = reader.result;
-                            const fileInfo = {
-                                data: new Uint8Array(arrayBuffer),
-                                fileName: file.name,
-                                extension: file.name.includes('.') ? file.name.split('.').slice(-1)[0] : '',
-                                contentType: file.type,
-                                path: '',
-                                size: file.size
-                            };
-                            this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
-                                .then(url => {
-                                    const range = this.quill.getSelection();
-                                    this.quill.insertEmbed(range.index, 'image', url);
-                                })
-                                .catch(error => console.error(error));
-                        };
-                        reader.readAsArrayBuffer(file);
-                    }
+                input.onchange = () => {
+                    if (input.files[0]) this.uploadAndInsert(input.files[0], index);
                 };
+                input.click();
             });
         }
 
         if (opt.beforeUpload) {
-            this.quill.root.addEventListener('paste',
-                (event) => {
-                    if (event.clipboardData && event.clipboardData.files && event.clipboardData.files.length > 0) {
-                        const file = event.clipboardData.files[0];
-                        if (file) {
-                            event.preventDefault();
-                            event.stopImmediatePropagation();
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                                const arrayBuffer = reader.result;
-                                const fileInfo = {
-                                    data: new Uint8Array(arrayBuffer),
-                                    fileName: file.name,
-                                    extension: file.name.includes('.') ? file.name.split('.').pop() : '',
-                                    contentType: file.type,
-                                    path: '',
-                                    size: file.size
-                                };
-                                this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
-                                    .then(url => {
-                                        const range = this.quill.getSelection() || { index: this.quill.getLength() };
-                                        if(fileInfo.contentType.indexOf('image') !== -1) {
-                                            this.quill.insertEmbed(range.index, 'image', url);
-                                        }
-                                        else {
-                                            this.quill.insertText(range.index, fileInfo.fileName, 'user');
-                                            this.quill.setSelection(range.index, fileInfo.fileName.length);
-                                            this.quill.theme.tooltip.edit('link', url);
-                                            this.quill.theme.tooltip.save();
-                                        }
-                                    })
-                                    .catch(error => console.error(error));
-                            };
-                            reader.readAsArrayBuffer(file);
-                        }
-                    }
-                }, true);
+            // Capture phase on the editor root: modules such as imageCompressor listen in the
+            // bubble phase, so stopping here keeps a dropped or pasted file from being inserted twice.
+            this.quill.root.addEventListener('paste', (event) => {
+                const files = event.clipboardData?.files;
+                if (!files || !files.length) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                this.uploadAndInsert(files[0], this.quill.getSelection()?.index);
+            }, true);
+
+            this.quill.root.addEventListener('drop', (event) => {
+                const files = event.dataTransfer?.files;
+                if (!files || !files.length) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                // Resolve the caret under the pointer now - the upload is async and the drop position is gone by then.
+                this.uploadAndInsert(files[0], this.indexFromPoint(event.clientX, event.clientY));
+            }, true);
         }
 
         if (opt.defaultToolHandlerNames) {
@@ -145,13 +115,13 @@
             window.addEventListener('resize', this.adjustTooltipPosition.bind(this));
             this.interval = setInterval(this.adjustTooltipPosition.bind(this), 100);
 
-            const resizeObserver = new ResizeObserver((entries) => {
+            this.resizeObserver = new ResizeObserver((entries) => {
                 if (entries.length > 0) {
                     var height = entries[0].target.getBoundingClientRect().height;
                     this.dotnet.invokeMethodAsync('OnHeightChanged', height);
                 }
             });
-            resizeObserver.observe(this.quill.root.parentNode);
+            this.resizeObserver.observe(this.quill.root.parentNode);
 
             
             const intersectionObserver = new IntersectionObserver((entries) => {
@@ -178,6 +148,54 @@
         }
 
         this.dotnet.invokeMethodAsync('OnCreated');
+    }
+
+    indexFromPoint(x, y) {
+        const range = document.caretRangeFromPoint
+            ? document.caretRangeFromPoint(x, y)
+            : (document.caretPositionFromPoint
+                ? (() => { const p = document.caretPositionFromPoint(x, y); if (!p) return null; const r = document.createRange(); r.setStart(p.offsetNode, p.offset); return r; })()
+                : null);
+        if (!range || !this.quill.root.contains(range.startContainer)) return undefined;
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        this.quill.update();
+        return this.quill.getSelection()?.index;
+    }
+
+    uploadAndInsert(file, index) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const fileInfo = {
+                data: new Uint8Array(reader.result),
+                fileName: file.name,
+                extension: file.name.includes('.') ? file.name.split('.').pop() : '',
+                contentType: file.type,
+                path: '',
+                size: file.size
+            };
+            this.dotnet.invokeMethodAsync('UploadImage', fileInfo)
+                .then(url => {
+                    const at = index ?? this.quill.getSelection()?.index ?? this.quill.getLength();
+                    if (fileInfo.contentType.indexOf('image') !== -1) {
+                        this.quill.insertEmbed(at, 'image', url, 'user');
+                        this.quill.setSelection(at + 1, 0);
+                    } else {
+                        this.quill.insertText(at, fileInfo.fileName, { link: url }, 'user');
+                        this.quill.setSelection(at + fileInfo.fileName.length, 0);
+                    }
+                })
+                .catch(error => console.error(error));
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // #31/#29: assigning root.innerHTML bypasses Quill's parser, which drops <pre> and <ul>/<li>.
+    // Going through the clipboard converter keeps them.
+    setHtml(html) {
+        this.quill.setContents(this.quill.clipboard.convert({ html: html ?? '' }), 'api');
+        return this.quill.root.innerHTML;
     }
 
     stopRecording() {
@@ -360,9 +378,12 @@
     dispose() {
         clearInterval(this.interval);
         this.stopRecording();
-        if (this.intersectionObserver) {
-            this.intersectionObserver.disconnect();
-            this.intersectionObserver = null;
+        this.intersectionObserver?.disconnect();
+        this.intersectionObserver = null;
+        this.resizeObserver?.disconnect();
+        this.resizeObserver = null;
+        if (this.host && this.host.mudRichTextEdit === this) {
+            this.host.__quill = this.host.quill = this.host.mudRichTextEdit = null;
         }
     }
 }

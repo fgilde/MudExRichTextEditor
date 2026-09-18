@@ -1,0 +1,15 @@
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Extensibility
+
+<MudDialog>
+    <DialogContent>
+        <MudExRichTextEdit @bind-Value="_value" Modules="@_modules" Height="300" />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    private string _value = "<p>hello</p>";
+    private IQuillModule[] _modules = [
+        new QuillMentionModule<string>((c, s) => Task.FromResult<IEnumerable<string>>(["Alice", "Bob", "Carol"]), '@')
+    ];
+}

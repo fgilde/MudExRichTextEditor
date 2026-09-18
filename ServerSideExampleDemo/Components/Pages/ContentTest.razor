@@ -1,0 +1,22 @@
+@page "/contenttest"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Types
+@rendermode InteractiveServer
+
+<MudToolBar>
+    <MudButton id="set-value" OnClick="@(() => _value = SampleHtml)">Set value with pre and list</MudButton>
+    <MudButton id="clear-value" OnClick="@(() => _value = null)">Clear</MudButton>
+</MudToolBar>
+
+<MudExRichTextEdit @bind-Value="_value"
+                   Tools="@QuillPresets.Full.Tools"
+                   Modules="@QuillPresets.Full.Modules"
+                   Height="320"
+                   Immediate="true" />
+
+<textarea id="out" readonly style="width:100%;height:150px">@_value</textarea>
+
+@code {
+    private const string SampleHtml = "<p>a</p><pre>code line</pre><ul><li>one <b>bold</b></li><li>two</li></ul>";
+    private string _value = "<p>Drop or paste an image here.</p>";
+}

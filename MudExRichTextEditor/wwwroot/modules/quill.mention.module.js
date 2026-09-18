@@ -36,26 +36,6 @@
         };
     }
 
-    _checkPosition() {        
-        const container = this.editor.querySelector('.ql-mention-list-container');
-        const quill = this.editor.__quill;
-        const range = quill.getSelection();
-        if (range) {
-            if (range.length === 0 && container) {                
-                const bounds = quill.getBounds(range.index);
-                const editorBounds = quill.container.getBoundingClientRect();
-
-                const absoluteTop = editorBounds.top + bounds.top;
-                const absoluteLeft = editorBounds.left + bounds.left;
-
-                container.style.position = 'fixed';
-                container.style.top = absoluteTop + 'px';
-                container.style.left = absoluteLeft + 'px';
-            }
-        }
-    }
-
-
 
     __getMentionConfig(quillOptions, initialConfig, editorElement) {
         //ql-mention-list-container
@@ -64,6 +44,9 @@
 
         var newConfig = {
             allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
+            // The default "normal" strategy anchors the list inside .ql-container, which lands in the
+            // wrong place as soon as the editor sits in a MudDialog or any transformed/scrolled parent.
+            positioningStrategy: existing?.positioningStrategy ?? 'fixed',
             dataAttributes: ['id', 'value', 'denotationChar', 'link', 'target', 'disabled', '__dataJson', '__editorId', '__type'],
             mentionDenotationChars: this.options.denotationChars,
             onSelect: (item, insertItem) => {
@@ -83,7 +66,6 @@
                             item.__dataJson = JSON.stringify(item.data);
                             return item;
                         }));
-                    this._checkPosition();
                 }
             }
         }

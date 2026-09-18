@@ -54,3 +54,16 @@
   }, { rootMargin: '-80px 0px -70% 0px' });
   targets.forEach(function (el) { io.observe(el); });
 })();
+
+// Draw the gilde mark once, a beat after the footer comes into view
+(function () {
+  var mark = document.querySelector('.gilde-mark');
+  if (!mark || !('IntersectionObserver' in window)) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var io = new IntersectionObserver(function (entries) {
+    if (!entries[0].isIntersecting) return;
+    io.disconnect();
+    setTimeout(function () { mark.classList.add('draw'); }, 1000);
+  }, { threshold: .4 });
+  io.observe(mark);
+})();

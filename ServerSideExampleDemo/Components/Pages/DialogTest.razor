@@ -1,0 +1,10 @@
+@page "/dialogtest"
+@rendermode InteractiveServer
+@inject IDialogService DialogService
+
+<MudButton id="open-editor" OnClick="OpenEditor">Open editor dialog</MudButton>
+
+@code {
+    private Task OpenEditor() => DialogService.ShowAsync<EditorDialog>("Editor",
+        new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.ExtraLarge, CloseOnEscapeKey = true });
+}

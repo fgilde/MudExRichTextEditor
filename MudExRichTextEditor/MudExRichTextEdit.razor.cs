@@ -150,28 +150,26 @@ public partial class MudExRichTextEdit
     /// <summary>
     /// Sets the HTML content of the editor.
     /// </summary>
+    /// <remarks>
+    /// The markup is routed through Quill's clipboard converter. Assigning it to the editor DOM directly
+    /// bypasses Quill's parser, which silently drops everything it does not recognize (&lt;pre&gt;, &lt;ul&gt;/&lt;li&gt;, ...).
+    /// </remarks>
     public async Task<string> SetHtml(string html)
     {
-        // Wait for initialization to complete before attempting to set HTML
-        if (!_initialized)
-        {
-            // Wait for up to 10 seconds for initialization to complete
-            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
-            var completedTask = await Task.WhenAny(_initializationTcs.Task, timeoutTask);
-            
-            if (completedTask == timeoutTask)
-            {
-                // Initialization timed out, but still attempt to set HTML in case it works
-                System.Diagnostics.Debug.WriteLine("MudExRichTextEdit: SetHtml called before initialization completed. Attempting anyway.");
-            }
-        }
-
-        return await JsRuntime.DInvokeAsync<string>((_, quillElement, html) =>
-        {
-            if (quillElement?.__quill?.root)
-                return quillElement.__quill.root.innerHTML = html;
+        if (!await WaitForInitializationAsync())
             return null;
-        }, ElementReference, html);
+        return await JsReference.InvokeAsync<string>("setHtml", html);
+    }
+
+    /// <summary>
+    /// Returns true once the editor is usable. The timeout is only a safety net for components that never
+    /// become interactive - in the normal case the task is already completed when this is called.
+    /// </summary>
+    private async Task<bool> WaitForInitializationAsync()
+    {
+        if (!_initialized)
+            await Task.WhenAny(_initializationTcs.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+        return _initialized && JsReference is not null;
     }
 
     public async Task<string> GetText()
@@ -367,20 +365,21 @@ public partial class MudExRichTextEdit
 
             await base.ImportModuleAndCreateJsAsync();
 
-            _initializationTcs.TrySetResult(true);
-            
+            _initialized = true;
+
             if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
                 await SetHtml(_initialContent);
-
-            _initialized = true;
         }
         catch (Microsoft.JSInterop.JSDisconnectedException)
         {
-            _initializationTcs.TrySetResult(false);
         }
         catch (ObjectDisposedException)
         {
-            _initializationTcs.TrySetResult(false);
+        }
+        finally
+        {
+            // Always complete, otherwise every SetHtml call after a failed start blocks for the full timeout.
+            _initializationTcs.TrySetResult(_initialized);
         }
     }
 

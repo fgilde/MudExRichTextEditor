@@ -253,6 +253,8 @@
 }</code></pre>
       <p>Das Modul bietet außerdem die Callbacks <code>MentionClicked</code>, <code>MentionHovered</code>,
       <code>BeforeMentionSelect</code> und <code>AfterMentionSelect</code>.</p>
+      <p>Die Vorschlagsliste wird mit der <code>fixed</code>-Strategie von quill-mention positioniert und landet damit
+      auch in einem <code>MudDialog</code> oder einem gescrollten bzw. transformierten Elternelement am Cursor.</p>
     </section>
     <section id="uploads">
       <h2>Dateien &amp; Uploads</h2>
@@ -301,6 +303,9 @@
       <div class="note"><p>Quill hält ein leeres Dokument als <code>&lt;p&gt;&lt;br&gt;&lt;/p&gt;</code> vor. Die Komponente
       wertet Markup ohne Text und ohne eingebettete Elemente als leer — Validierung und <code>ValueChanged</code>
       funktionieren damit auch, wenn der Nutzer das Feld leert.</p></div>
+      <div class="note info"><p>Eingehendes Markup läuft durch Quills eigenen Konverter. Nur deshalb bleiben
+      <code>&lt;pre&gt;</code>, <code>&lt;ul&gt;</code>/<code>&lt;li&gt;</code> und verschachtelte Inline-Formatierung
+      erhalten. Was Quill nicht als Blot kennt, fällt weiterhin weg — dafür einen eigenen Blot registrieren.</p></div>
     </section>
     <section id="appearance">
       <h2>Themes &amp; Aussehen</h2>
@@ -357,9 +362,15 @@
       <p>Ja. Das Paket bringt seine MudBlazor-Abhängigkeit mit; der Rest der App muss nicht damit gebaut sein.</p>
       <h3>Wie bekomme ich echtes HTML statt Quill-Markup?</h3>
       <p>Das voreingestellte <code>GetHtmlBehavior.SemanticHtml</code> verwenden oder <code>GetSemanticHTML()</code> aufrufen.</p>
-      <h3>Bilder werden beim Drag &amp; Drop doppelt eingefügt</h3>
-      <p>Entweder das Bildkomprimierungs-Modul oder eine eigene Drop-Behandlung verwenden, nicht beides — zwei Handler,
-      die dieselbe Datei einfügen, sind die übliche Ursache.</p>
+      <h3>Warum kommt mein Markup verändert zurück?</h3>
+      <p>Markup, das du an <code>Value</code> übergibst, wird von Quill geparst und damit auf das normalisiert, was Quill
+      darstellen kann: <code>&lt;b&gt;</code> wird zu <code>&lt;strong&gt;</code>, <code>&lt;pre&gt;</code> zu einem
+      Codeblock, Listeneinträge bekommen Quill-eigene Attribute. Das zurückgelesene semantische HTML ist gleichwertig,
+      nicht bytegleich.</p>
+      <h3>Drag &amp; Drop und Einfügen</h3>
+      <p>Die Komponente behandelt beides selbst und fügt die Datei genau einmal ein, an der Stelle des Drops. Keinen
+      eigenen <code>drop</code>- oder <code>paste</code>-Handler für Dateien auf der Editor-Wurzel ergänzen — genau das
+      führt zu doppelten Bildern.</p>
     </section>
   </div>
 </main>
@@ -385,11 +396,11 @@
         <div class="partners">
           <a class="partner" href="https://gilde.org" rel="noopener">
             <svg class="gilde-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><defs><linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe6a8"/><stop offset="0.45" stop-color="#e0a24e"/><stop offset="1" stop-color="#a9761f"/></linearGradient></defs><g fill="none" stroke="url(#gGold)" stroke-width="56" stroke-linecap="square" stroke-linejoin="miter"><path d="M376 88H112v264l144 112 144-112v-96H280" pathLength="1"/><path d="M280 216h120" pathLength="1"/></g></svg>
-            <span>gilde.org</span>
+            <span><b>Gilde</b><small>gilde.org</small></span>
           </a>
           <a class="partner" href="https://www.mudex.org" rel="noopener">
-            <img src="../assets/mudex-logo.png" alt="" width="30" height="30" loading="lazy">
-            <span>mudex.org</span>
+            <img src="../assets/mudex-logo.png" alt="" width="40" height="40" loading="lazy">
+            <span><b>MudBlazor.Extensions</b><small>mudex.org</small></span>
           </a>
         </div>
       </div>

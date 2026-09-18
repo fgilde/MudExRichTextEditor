@@ -317,26 +317,26 @@ td code { white-space: nowrap; }
 .footer-grid a { display: block; padding: 5px 0; color: var(--fg-muted); }
 .footer-grid a:hover { color: var(--teal); }
 
-.partners { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
-.partner {
-  display: inline-flex; align-items: center; gap: var(--space-2);
-  min-height: 48px; padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--fg); font-weight: 500; font-size: .92rem;
-  transition: border-color .25s var(--ease), background .25s var(--ease);
+.partners { display: grid; gap: var(--space-2); }
+.partners .partner {
+  display: grid; grid-template-columns: 40px 1fr; align-items: center;
+  gap: var(--space-3); padding: var(--space-3);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg); line-height: 1.3;
+  transition: border-color .25s var(--ease), transform .25s var(--ease);
 }
-.partner:hover { text-decoration: none; border-color: var(--teal); background: var(--bg-sunken); }
-.partner img { width: 30px; height: 30px; }
-.partner svg { width: 34px; height: 34px; }
+.partners .partner:hover { text-decoration: none; border-color: var(--teal); transform: translateY(-2px); }
+.partners .partner img, .partners .partner svg { width: 40px; height: 40px; display: block; }
+.partners .partner b { display: block; font-size: .95rem; font-weight: 600; }
+.partners .partner small { color: var(--fg-muted); font-size: .8rem; }
 
-/* animated gilde mark: the paths carry pathLength="1", so one dash unit draws the whole stroke */
-.gilde-mark path { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: draw 3.6s var(--ease) infinite; }
-.gilde-mark path:nth-child(2) { animation-delay: .35s; }
-@keyframes draw {
-  0% { stroke-dashoffset: 1; }
-  38%, 72% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 1; }
-}
+/* gilde mark: the paths carry pathLength="1", so one dash unit draws the whole stroke.
+   Drawn once, a beat after the footer scrolls into view. */
+.gilde-mark path { stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+.gilde-mark.draw path { animation: draw 1.4s var(--ease) backwards; }
+.gilde-mark.draw path:nth-child(2) { animation-delay: .5s; }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
 .footer-bottom {
   margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border);
