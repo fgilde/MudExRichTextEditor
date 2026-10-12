@@ -89,7 +89,8 @@ public partial class MudExRichTextEdit
     }
 
     [Parameter] public bool EnableResize { get; set; }
-    [Parameter] public string Placeholder { get; set; } = "Insert text here...";
+    private const string DefaultPlaceholder = "Insert text here...";
+    [Parameter] public string Placeholder { get; set; } = DefaultPlaceholder;
     [Parameter] public QuillTheme Theme { get; set; } = QuillTheme.Snow;
     [Parameter] public QuillDebugLevel DebugLevel { get; set; } = QuillDebugLevel.Warn;
     [Parameter] public MudExColor? BackgroundColor { get; set; }
@@ -184,7 +185,7 @@ public partial class MudExRichTextEdit
             {
                 quillElement.__quill.root.dataset.placeholder = mode ? placeholder : "";
             }
-        }, ElementReference, mode, TryLocalize(Placeholder));
+        }, ElementReference, mode, LocalizedPlaceholder());
 
     public async Task InsertHtmlAsync(string html) => await JsReference.InvokeVoidAsync("insertMarkup", html);
 
@@ -344,7 +345,10 @@ public partial class MudExRichTextEdit
         };
     }
 
-    private string GetPlaceholder() => ReadOnly ? string.Empty : TryLocalize(Placeholder);
+    private string GetPlaceholder() => ReadOnly ? string.Empty : LocalizedPlaceholder();
+
+    // Only the built-in default is localized; a custom placeholder is shown as given.
+    private string LocalizedPlaceholder() => Placeholder == DefaultPlaceholder ? TryLocalize(Placeholder) : Placeholder;
 
     public override async Task ImportModuleAndCreateJsAsync()
     {
