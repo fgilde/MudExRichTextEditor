@@ -19,12 +19,13 @@
     </MudItem>
     <MudItem xs="12" md="6">
         <MudText Typo="Typo.h6">MudExRichTextEdit (Quill)</MudText>
-        <MudExRichTextEdit Value="@_content" Height="400" Tools="@_tools" Modules="@_quillModules" ReadOnly="@_readOnly" />
+        <MudExRichTextEdit @ref="_quill" Value="@_content" Height="400" Tools="@_tools" Modules="@_quillModules" ReadOnly="@_readOnly" />
     </MudItem>
 </MudGrid>
 
 <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@(async () => _json = await _tiptap.GetContent())">Tiptap GetContent()</MudButton>
 <MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@ShowMentions">Tiptap mentions</MudButton>
+<MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@(async () => _content = await _quill.GetValue(GetHtmlBehavior.SemanticHtml))">Quill → Tiptap</MudButton>
 <MudText Class="mt-2" id="mention-log">@_mentionLog</MudText>
 
 <MudPaper Class="pa-4 mt-4">
@@ -35,6 +36,7 @@
 
 @code {
     private MudExTiptapEdit _tiptap;
+    private MudExRichTextEdit _quill;
     private string _mentionLog;
     private ITiptapModule[] _tiptapModules;
     private IQuillModule[] _quillModules;

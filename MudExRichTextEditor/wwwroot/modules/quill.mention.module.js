@@ -9,14 +9,14 @@
     }
 
     onMentionHovered(event) {
-        if (event?.value?.__editorId === this.editor.id && event?.value?.__type === this.type) { // because maybe we have multiple editors on the same page
+        if (this.editor?.contains(event?.event?.target) && event?.value?.__type === this.type) { // the element check keeps multiple editors apart and, unlike the per-instance editor id, still matches reloaded content
             event.value.data = event.value?.data || JSON.parse(event.value.__dataJson);
             this.dotnet.invokeMethodAsync('OnMentionHovered', event.value);
         }
     }
 
     onMentionClicked(event) {
-        if (event?.value?.__editorId === this.editor.id && event?.value?.__type === this.type) { // because maybe we have multiple editors on the same page
+        if (this.editor?.contains(event?.event?.target) && event?.value?.__type === this.type) { // the element check keeps multiple editors apart and, unlike the per-instance editor id, still matches reloaded content
             event.value.data = event.value?.data || JSON.parse(event.value.__dataJson);
             this.dotnet.invokeMethodAsync('OnMentionClicked', event.value);
         }

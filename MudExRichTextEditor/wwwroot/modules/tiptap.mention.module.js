@@ -1,10 +1,19 @@
 // Same resolved URL as the import in MudExTiptapEdit.js, so both share one Tiptap/ProseMirror instance.
 import { Mention, computePosition, flip, shift, offset } from '../lib/tiptap/tiptap.bundle.js';
 
+// Mentions use the HTML of quill-mention (data-value, data-denotation-char, data-__data-json, data-__type),
+// so content moves between MudExRichTextEdit and MudExTiptapEdit without losing them.
+const quillAttribute = (html, key) => ({
+    default: null,
+    parseHTML: el => el.getAttribute(html),
+    renderHTML: attrs => attrs[key] == null ? {} : { [html]: attrs[key] }
+});
+
 class TiptapMentionModule {
     constructor(dotnet, options) {
         this.dotnet = dotnet;
         this.options = options;
+        this.selector = `span.mention[data-__type="${options.type}"]`;
     }
 
     // Called by MudExTiptapEdit.js before the editor is created.
@@ -16,19 +25,21 @@ class TiptapMentionModule {
             name: this.options.name,
             addAttributes() {
                 return {
-                    ...this.parent?.(),
-                    dataJson: {
-                        default: null,
-                        parseHTML: el => el.getAttribute('data-json'),
-                        renderHTML: attrs => attrs.dataJson ? { 'data-json': attrs.dataJson } : {}
-                    }
+                    id: quillAttribute('data-id', 'id'),
+                    label: quillAttribute('data-value', 'label'),
+                    mentionSuggestionChar: quillAttribute('data-denotation-char', 'mentionSuggestionChar'),
+                    dataJson: quillAttribute('data-__data-json', 'dataJson'),
                 };
+            },
+            // Quill writes no data-type, the .NET type name identifies the module in both editors.
+            parseHTML() {
+                return [{ tag: module.selector }];
             },
             onCreate() {
                 module.bindDomEvents(this.editor.view.dom);
             },
         }).configure({
-            HTMLAttributes: { class: 'mention' },
+            HTMLAttributes: { class: 'mention', 'data-__type': this.options.type },
             suggestions: this.options.denotationChars.map(char => ({
                 char,
                 items: async ({ query }) => (await this.dotnet.invokeMethodAsync('GetSuggestions', char, query)) ?? [],
@@ -38,7 +49,7 @@ class TiptapMentionModule {
     }
 
     bindDomEvents(dom) {
-        const find = e => e.target.closest?.(`span[data-type="${this.options.name}"]`);
+        const find = e => e.target.closest?.(this.selector);
         dom.addEventListener('click', e => {
             const el = find(e);
             if (el) this.dotnet.invokeMethodAsync('OnMentionClicked', this.toItem(this.attrsFromElement(el)));
@@ -50,7 +61,7 @@ class TiptapMentionModule {
     }
 
     attrsFromElement(el) {
-        return { id: el.dataset.id, label: el.dataset.label, mentionSuggestionChar: el.dataset.mentionSuggestionChar, dataJson: el.dataset.json };
+        return { id: el.dataset.id, label: el.dataset.value, mentionSuggestionChar: el.dataset.denotationChar, dataJson: el.dataset.__dataJson };
     }
 
     toItem(attrs) {
