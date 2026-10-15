@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="9.10.0" />
+    <PackageReference Include="MudBlazor" Version="9.11.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MudExRichTextEditor\MudExRichTextEditor.csproj" />
