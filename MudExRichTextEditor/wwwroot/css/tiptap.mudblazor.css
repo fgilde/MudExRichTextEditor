@@ -1,0 +1,172 @@
+.mudex-tiptap .ql-tb-hidden {
+    display: none;
+}
+
+.mudex-tiptap .tt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 42px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-bottom: none;
+    border-radius: var(--mud-default-borderradius) var(--mud-default-borderradius) 0 0;
+    color: var(--mud-palette-text-primary);
+}
+
+.mudex-tiptap .tt-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 6px;
+    margin-right: 6px;
+    border-right: 1px solid var(--mud-palette-lines-default);
+}
+
+.mudex-tiptap .tt-group:last-child {
+    border-right: none;
+}
+
+.mudex-tiptap .tt-toolbar button {
+    display: inline-flex;
+    padding: 4px;
+    border: none;
+    border-radius: var(--mud-default-borderradius);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.mudex-tiptap .tt-toolbar button:hover {
+    background: var(--mud-palette-action-default-hover);
+}
+
+.mudex-tiptap .tt-toolbar button.ql-active {
+    color: var(--mud-palette-primary);
+    background: var(--mud-palette-action-default-hover);
+}
+
+.mudex-tiptap .tt-toolbar select {
+    height: 28px;
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--mud-default-borderradius);
+    background: transparent;
+    color: inherit;
+}
+
+.mudex-tiptap .tt-toolbar select option {
+    background: var(--mud-palette-surface);
+}
+
+.mudex-tiptap .tt-toolbar input[type=color] {
+    width: 28px;
+    height: 28px;
+    padding: 2px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.mudex-tiptap .tt-container {
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: 0 0 var(--mud-default-borderradius) var(--mud-default-borderradius);
+}
+
+.mudex-tiptap .tt-container:focus-within {
+    border-color: var(--mud-palette-primary);
+}
+
+.mudex-tiptap .ProseMirror {
+    min-height: 100px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 12px 15px;
+    outline: none;
+    color: var(--mud-palette-text-primary);
+    font-family: var(--mud-typography-default-family);
+    font-size: var(--mud-typography-body1-size);
+}
+
+.mudex-tiptap .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    color: var(--mud-palette-text-disabled);
+}
+
+.mudex-tiptap .ProseMirror p {
+    margin: 0;
+}
+
+.mudex-tiptap .ProseMirror ul,
+.mudex-tiptap .ProseMirror ol {
+    padding-left: 1.5em;
+}
+
+.mudex-tiptap .ProseMirror blockquote {
+    margin: 4px 0;
+    padding-left: 12px;
+    border-left: 4px solid var(--mud-palette-lines-default);
+}
+
+.mudex-tiptap .ProseMirror pre {
+    padding: 8px 12px;
+    border-radius: var(--mud-default-borderradius);
+    background: var(--mud-palette-background-gray);
+    color: var(--mud-palette-text-primary);
+    font-family: monospace;
+}
+
+.mudex-tiptap .ProseMirror pre code {
+    padding: 0;
+    background: none;
+    color: inherit;
+}
+
+.mudex-tiptap .ProseMirror a {
+    color: var(--mud-palette-primary);
+}
+
+.mudex-tiptap .ProseMirror img {
+    max-width: 100%;
+    height: auto;
+}
+
+.mudex-tiptap .ProseMirror img.ProseMirror-selectednode {
+    outline: 2px solid var(--mud-palette-primary);
+}
+
+.mudex-tiptap .ProseMirror .mention {
+    padding: 0 4px;
+    border-radius: var(--mud-default-borderradius);
+    background: var(--mud-palette-primary-hover);
+    color: var(--mud-palette-primary);
+    cursor: pointer;
+}
+
+/* Appended to body by tiptap.mention.module.js, so it stays above dialogs. */
+.tt-mention-list {
+    position: fixed;
+    z-index: 2000;
+    min-width: 160px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 4px 0;
+    border-radius: var(--mud-default-borderradius);
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    box-shadow: var(--mud-elevation-8);
+    font-family: var(--mud-typography-default-family);
+}
+
+.tt-mention-item {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.tt-mention-item:hover,
+.tt-mention-item.selected {
+    background: var(--mud-palette-action-default-hover);
+}

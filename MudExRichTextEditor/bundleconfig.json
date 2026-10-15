@@ -6,6 +6,12 @@
     ]
   },
   {
+    "outputFileName": "wwwroot/js/components/MudExTiptapEdit.min.js",
+    "inputFiles": [
+      "wwwroot/js/components/MudExTiptapEdit.js"
+    ]
+  },
+  {
     "outputFileName": "wwwroot/modules/quill.mention.module.min.js",
     "inputFiles": [
       "wwwroot/modules/quill.mention.module.js"

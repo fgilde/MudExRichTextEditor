@@ -1,0 +1,25 @@
+{
+  "name": "mudex-tiptap-bundle",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "esbuild entry.js --bundle --format=esm --minify --legal-comments=eof --outfile=../MudExRichTextEditor/wwwroot/lib/tiptap/tiptap.bundle.js",
+    "minify": "esbuild ../MudExRichTextEditor/wwwroot/js/components/MudExRichTextEdit.js ../MudExRichTextEditor/wwwroot/js/components/MudExTiptapEdit.js --minify --outdir=../MudExRichTextEditor/wwwroot/js/components --out-extension:.js=.min.js --allow-overwrite"
+  },
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@floating-ui/dom": "^1.8.0",
+    "@tiptap/core": "^3.32.0",
+    "@tiptap/extension-highlight": "^3.32.0",
+    "@tiptap/extension-image": "^3.32.0",
+    "@tiptap/extension-mention": "^3.32.0",
+    "@tiptap/extension-text-align": "^3.32.0",
+    "@tiptap/extension-text-style": "^3.32.0",
+    "@tiptap/extensions": "^3.32.0",
+    "@tiptap/pm": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
+    "@tiptap/suggestion": "^3.32.0",
+    "esbuild": "^0.28.2"
+  },
+  "private": true
+}

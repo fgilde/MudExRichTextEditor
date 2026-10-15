@@ -198,6 +198,20 @@
         return this.quill.root.innerHTML;
     }
 
+    // Engine contract shared with MudExTiptapEdit.js - the C# base class only calls these.
+    getHtml() { return this.quill?.root?.innerHTML; }
+    getSemanticHtml() { return this.quill?.getSemanticHTML(); }
+    getText() { return this.quill?.getText(); }
+    getContent() { return JSON.stringify(this.quill?.getContents()); }
+    loadContent(content) { this.quill.setContents(JSON.parse(content), 'api'); }
+
+    enable(mode, placeholder) {
+        this.quill?.enable(mode);
+        if (this.quill?.root?.dataset) {
+            this.quill.root.dataset.placeholder = mode ? placeholder : '';
+        }
+    }
+
     stopRecording() {
         if (this.recognition) {
             this.recognition.stop();

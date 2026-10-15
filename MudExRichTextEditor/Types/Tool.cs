@@ -8,12 +8,12 @@ namespace MudExRichTextEditor.Types;
 
 public class CustomTool: QuillTool
 {
-    public Func<CustomTool, MudExRichTextEdit, Task> OnClick { get; set; }
-    public Func<CustomTool, MudExRichTextEdit, string> Icon { get; set; }
-    public Func<CustomTool, MudExRichTextEdit, Color> Color { get; set; }
-    public Func<CustomTool, MudExRichTextEdit, string> Tooltip { get; set; }
+    public Func<CustomTool, IMudExRichTextEdit, Task> OnClick { get; set; }
+    public Func<CustomTool, IMudExRichTextEdit, string> Icon { get; set; }
+    public Func<CustomTool, IMudExRichTextEdit, Color> Color { get; set; }
+    public Func<CustomTool, IMudExRichTextEdit, string> Tooltip { get; set; }
 
-    public CustomTool(Func<CustomTool, MudExRichTextEdit, Task> onClick, string icon, string tooltip = "", Color color = MudBlazor.Color.Inherit, int group = 99, string cls = "") : base(cls, "", group)
+    public CustomTool(Func<CustomTool, IMudExRichTextEdit, Task> onClick, string icon, string tooltip = "", Color color = MudBlazor.Color.Inherit, int group = 99, string cls = "") : base(cls, "", group)
     {
         OnClick = onClick;
         Icon = (_,_) => icon;
@@ -22,7 +22,7 @@ public class CustomTool: QuillTool
     }
 
     public CustomTool(
-        Func<CustomTool, MudExRichTextEdit, Task> onClick, Func<CustomTool, MudExRichTextEdit, string> icon, Func<CustomTool, MudExRichTextEdit, string> tooltip = null, Func<CustomTool, MudExRichTextEdit, Color> color = null,
+        Func<CustomTool, IMudExRichTextEdit, Task> onClick, Func<CustomTool, IMudExRichTextEdit, string> icon, Func<CustomTool, IMudExRichTextEdit, string> tooltip = null, Func<CustomTool, IMudExRichTextEdit, Color> color = null,
         int group = 99, string cls = "") : base(cls, "", group)
     {
         OnClick = onClick;

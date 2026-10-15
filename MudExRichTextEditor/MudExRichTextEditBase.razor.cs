@@ -1,65 +1,51 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using BlazorJS;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
-using MudExRichTextEditor.Types;
-using Nextended.Core.Extensions;
-using System.Linq;
-using System.Text.RegularExpressions;
 using MudBlazor.Extensions;
 using MudBlazor.Extensions.Components;
 using MudBlazor.Extensions.Core;
 using MudBlazor.Extensions.Helper;
 using MudBlazor.Extensions.Options;
+using MudExRichTextEditor.Types;
 using Nextended.Blazor.Models;
-using Microsoft.AspNetCore.Components.Web;
-using MudExRichTextEditor.Extensibility;
+using Nextended.Core.Extensions;
 
 namespace MudExRichTextEditor;
 
-public partial class MudExRichTextEdit
+/// <summary>
+/// Engine independent part of the rich text editors. Everything that talks to the editor library itself
+/// lives in the component specific JS class, which has to provide the same method names for every engine.
+/// </summary>
+public abstract partial class MudExRichTextEditBase<T> : IMudExRichTextEdit where T : MudExRichTextEditBase<T>
 {
     #region Fields
 
-    private string _editorId = $"mud-ex-rich-edit-{Guid.NewGuid().ToFormattedId()}";
-    private List<object> _jsQuillModuleConfigs = new();
+    private readonly string _editorId = $"mud-ex-rich-edit-{Guid.NewGuid().ToFormattedId()}";
     private string id;
     private bool _recording;
-    private int _toolBarHeight = 42;
+    protected int _toolBarHeight = 42;
     private string _initialContent;
-    private bool _initialized = false;
-    private bool _initCalled = false;
+    protected bool _initialized = false;
     private bool _sourceLoaded = false;
     private bool _readOnly = false;
-    private TaskCompletionSource<bool> _initializationTcs = new TaskCompletionSource<bool>();
+    private readonly TaskCompletionSource<bool> _initializationTcs = new();
 
     private MudExSize<double>? _height;
-    //internal ElementReference QuillElement;
     internal ElementReference ToolBar;
 
     #endregion
 
-    private static string AssemblyVersion => typeof(MudExRichTextEdit).Assembly.GetName().Version.ToString();
+    private static string AssemblyVersion => typeof(T).Assembly.GetName().Version.ToString();
     public static string CacheBuster => $"?c={AssemblyVersion}{(Debugger.IsAttached ? Guid.NewGuid().ToFormattedId() : "")}";
 
     #region Parameters
-    private string[] _preInitParameters;
-
-    private bool IsOverwritten(string paramName) => _preInitParameters?.Contains(paramName) == true;
-
-    /// <summary>
-    /// If this is true, the editor will always add the recommended modules to <see cref="Modules"/>, Explicit is better than implicit. Users should opt-in to extra features, not opt-out.
-    /// </summary>
-    [Obsolete("Use QuillPresets instead for recommended configurations.")]
-    [Parameter] public bool AlwaysUseRecommendedModules { get; set; } = false;
     [Parameter] public bool UseCultureForSpeechRecognition { get; set; } = true;
-
-    [Parameter] public IQuillModule[] Modules { get; set; }
 
     [Parameter] public QuillTool[] Tools { get; set; } = null;
 
@@ -91,8 +77,6 @@ public partial class MudExRichTextEdit
     [Parameter] public bool EnableResize { get; set; }
     private const string DefaultPlaceholder = "Insert text here...";
     [Parameter] public string Placeholder { get; set; } = DefaultPlaceholder;
-    [Parameter] public QuillTheme Theme { get; set; } = QuillTheme.Snow;
-    [Parameter] public QuillDebugLevel DebugLevel { get; set; } = QuillDebugLevel.Warn;
     [Parameter] public MudExColor? BackgroundColor { get; set; }
     [Parameter] public MudExColor? ToolBarBackgroundColor { get; set; }
     [Parameter] public MudExColor? BorderColor { get; set; }
@@ -120,9 +104,43 @@ public partial class MudExRichTextEdit
 
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
-    public IEnumerable<IQuillModule> AllModules => (Modules ?? Enumerable.Empty<IQuillModule>()).Concat(AlwaysUseRecommendedModules ? QuillModules.RecommendedModules : []).DistinctBy(m => m.GetType());
+    [Parameter] public Func<UploadableFile, Task<string>> CustomUploadFunc { get; set; }
 
     #endregion
+
+    #region Engine specific
+
+    /// <summary>
+    /// Loads the editor library (scripts, styles, plugins) before the component markup is rendered and the JS class is created.
+    /// </summary>
+    protected abstract Task LoadEditorSourcesAsync();
+
+    /// <summary>
+    /// Toolbar that is rendered for <see cref="Tools"/> when no <see cref="ToolbarContent"/> is given.
+    /// </summary>
+    protected abstract RenderFragment DefaultToolbar { get; }
+
+    protected virtual bool ShouldHideToolbar() => HideToolbarWhenReadOnly && ReadOnly;
+
+    /// <summary>
+    /// Options passed to the JS class. Keys are used as is, so they have to be camelCase.
+    /// </summary>
+    protected virtual Dictionary<string, object> JsOptions() => new()
+    {
+        ["beforeUpload"] = true,
+        ["defaultToolHandlerNames"] = DefaultToolHandlers?.Select(x => x.Identifier).ToArray(),
+        ["toolBar"] = ToolBar,
+        ["readOnly"] = ReadOnly,
+        ["placeholder"] = GetPlaceholder()
+    };
+
+    #endregion
+
+    private Task<TResult> InvokeJsAsync<TResult>(string method, params object[] args)
+        => JsReference is null ? Task.FromResult<TResult>(default) : JsReference.InvokeAsync<TResult>(method, args).AsTask();
+
+    private Task InvokeJsVoidAsync(string method, params object[] args)
+        => JsReference is null ? Task.CompletedTask : JsReference.InvokeVoidAsync(method, args).AsTask();
 
     public Task<string> GetValue(GetHtmlBehavior behavior) => behavior switch
     {
@@ -133,28 +151,22 @@ public partial class MudExRichTextEdit
         _ => GetHtml()
     };
 
-    public Task<string> GetHtml(bool semantic) 
+    public Task<string> GetHtml(bool semantic)
         => semantic ? GetSemanticHTML() : GetHtml();
 
     /// <summary>
     /// Returns the current HTML content of the editor.
     /// </summary>
-    public async Task<string> GetHtml()
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.root?.innerHTML, ElementReference);
+    public Task<string> GetHtml() => InvokeJsAsync<string>("getHtml");
 
     /// <summary>
     /// Returns the current semantic HTML content of the editor.
     /// </summary>
-    public async Task<string> GetSemanticHTML()
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.getSemanticHTML(), ElementReference);
+    public Task<string> GetSemanticHTML() => InvokeJsAsync<string>("getSemanticHtml");
 
     /// <summary>
-    /// Sets the HTML content of the editor.
+    /// Sets the HTML content of the editor. The markup goes through the editor's own parser, which keeps only what its schema knows.
     /// </summary>
-    /// <remarks>
-    /// The markup is routed through Quill's clipboard converter. Assigning it to the editor DOM directly
-    /// bypasses Quill's parser, which silently drops everything it does not recognize (&lt;pre&gt;, &lt;ul&gt;/&lt;li&gt;, ...).
-    /// </remarks>
     public async Task<string> SetHtml(string html)
     {
         if (!await WaitForInitializationAsync())
@@ -173,29 +185,19 @@ public partial class MudExRichTextEdit
         return _initialized && JsReference is not null;
     }
 
-    public async Task<string> GetText()
-        => await JsRuntime.DInvokeAsync<string>((_, quillElement) => quillElement?.__quill?.getText(), ElementReference);
-    public async Task<string> GetContent()
-        => await JsRuntime.DInvokeAsync<string>((window, quillElement) => window.JSON.stringify(quillElement?.__quill?.getContents()), ElementReference);
-    public async Task EnableEditor(bool mode)
-        => await JsRuntime.DInvokeVoidAsync((_, quillElement, mode, placeholder) =>
-        {
-            quillElement?.__quill?.enable(mode);
-            if (quillElement?.__quill?.root?.dataset)
-            {
-                quillElement.__quill.root.dataset.placeholder = mode ? placeholder : "";
-            }
-        }, ElementReference, mode, LocalizedPlaceholder());
-
-    public async Task InsertHtmlAsync(string html) => await JsReference.InvokeVoidAsync("insertMarkup", html);
+    public Task<string> GetText() => InvokeJsAsync<string>("getText");
 
     /// <inheritdoc />
-    public override Task SetParametersAsync(ParameterView parameters)
-    {
-        if (!_initCalled)
-            _preInitParameters = parameters.ToDictionary().Select(x => x.Key).ToArray();
-        return base.SetParametersAsync(parameters);
-    }
+    public Task<string> GetContent() => InvokeJsAsync<string>("getContent");
+
+    /// <inheritdoc />
+    public Task LoadContent(string content) => InvokeJsVoidAsync("loadContent", content);
+
+    public Task EnableEditor(bool mode) => InvokeJsVoidAsync("enable", mode, LocalizedPlaceholder());
+
+    public Task InsertHtmlAsync(string html) => InvokeJsVoidAsync("insertMarkup", html);
+
+    public Task InsertImage(string imageUrl) => InvokeJsVoidAsync("insertImage", imageUrl);
 
     protected override Task OnInitializedAsync()
     {
@@ -203,8 +205,7 @@ public partial class MudExRichTextEdit
         if (!_initialized && EditorContent == null && !string.IsNullOrWhiteSpace(Value))
             _initialContent = Value;
         if (!IsOverwritten(nameof(Tools)))
-            Tools = GetTools();        
-        _initCalled = true;
+            Tools = GetTools();
         return base.OnInitializedAsync();
     }
 
@@ -217,7 +218,7 @@ public partial class MudExRichTextEdit
             ]).ToArray();
     }
 
-    private QuillTool[] ActiveTools => Tools ?? [];
+    protected QuillTool[] ActiveTools => Tools ?? [];
 
     [JSInvokable]
     public void OnHeightChanged(double? height)
@@ -234,13 +235,6 @@ public partial class MudExRichTextEdit
         if (Immediate || IsHtmlEmpty(content) != IsHtmlEmpty(_value))
             await RaiseValueChangeForCurrentValue();
     }
-
-
-    private async Task OnFocusLeft(PointerEventArgs arg)
-    {
-        await RaiseValueChangeForCurrentValue();
-    }
-
 
     [JSInvokable]
     public async Task OnBlur(string content, string source)
@@ -270,26 +264,7 @@ public partial class MudExRichTextEdit
     }
 
     [JSInvokable]
-    public async Task OnCreated()
-    {
-        await Task.WhenAll(AllModules.Select(m => m.OnCreatedAsync(JsRuntime, this)));
-    }
-
-    public T GetModule<T>() where T : IQuillModule => (T)AllModules.FirstOrDefault(m => m is T);
-
-    public async Task LoadContent(string content)
-    {
-        await JsRuntime.DInvokeVoidAsync((window, quillElement, content) =>
-        {
-            var parsedContent = window.JSON.parse(content);
-            quillElement.__quill.setContents(parsedContent, "api");
-        }, ElementReference, content);
-    }
-
-
-    //public async Task InsertImage(string imageUrl) => await Quill.InsertImage(JsRuntime, ElementReference, imageUrl);
-    public async Task InsertImage(string imageUrl) => await JsReference.InvokeAsync<object>(nameof(InsertImage).ToLower(true), imageUrl);
-
+    public virtual Task OnCreated() => Task.CompletedTask;
 
     [JSInvokable]
     public Task DelegateHandler(string identifier, object[] args)
@@ -297,7 +272,7 @@ public partial class MudExRichTextEdit
         var handler = DefaultToolHandlers?.FirstOrDefault(handler => handler.Identifier == identifier);
         return handler?.Handler(this, args);
     }
-    
+
     private void SetValueBackingField(string value)
     {
         // TODO: Maybe not when readonly?
@@ -308,15 +283,13 @@ public partial class MudExRichTextEdit
         }
     }
 
-    private bool ShouldHideToolbar() => HideToolbarWhenReadOnly && ReadOnly && Theme == QuillTheme.Snow;
-
     protected override bool HasValue(string value) => !IsHtmlEmpty(value);
 
     private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
     private static readonly Regex HtmlEmbedRegex = new(@"<\s*(img|iframe|video|audio|embed|object|svg|canvas|table|hr|input|picture|source)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     /// <summary>
-    /// Quill keeps markup for an empty document (&lt;p&gt;&lt;br&gt;&lt;/p&gt; or &lt;p&gt;&lt;/p&gt;), so a plain string check reports a value that is not there.
+    /// Editors keep markup for an empty document (&lt;p&gt;&lt;br&gt;&lt;/p&gt; or &lt;p&gt;&lt;/p&gt;), so a plain string check reports a value that is not there.
     /// </summary>
     internal static bool IsHtmlEmpty(string html)
     {
@@ -328,23 +301,6 @@ public partial class MudExRichTextEdit
         return string.IsNullOrWhiteSpace(text);
     }
 
-    private object JsOptions()
-    {
-        return new
-        {
-            //BeforeUpload = CustomUploadFunc != null,
-            BeforeUpload = true,
-            QuillElement = ElementReference,
-            DefaultToolHandlerNames = DefaultToolHandlers?.Select(x => x.Identifier).ToArray(),
-            ToolBar,
-            ReadOnly,
-            Placeholder = GetPlaceholder(),
-            Theme = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(Theme),
-            DebugLevel = Nextended.Core.Helper.EnumExtensions.ToDescriptionString(DebugLevel),
-            Modules = _jsQuillModuleConfigs,
-        };
-    }
-
     private string GetPlaceholder() => ReadOnly ? string.Empty : LocalizedPlaceholder();
 
     // Only the built-in default is localized; a custom placeholder is shown as given.
@@ -354,16 +310,7 @@ public partial class MudExRichTextEdit
     {
         try
         {
-            await JsRuntime.LoadFilesAsync(
-                $"./_content/MudExRichTextEditor/lib/quill/quill.bubble.css{CacheBuster}",
-                $"./_content/MudExRichTextEditor/lib/quill/quill.snow.css{CacheBuster}",
-                $"./_content/MudExRichTextEditor/css/quill.mudblazor.css{CacheBuster}",
-                $"./_content/MudExRichTextEditor/lib/quill/quill.js{CacheBuster}"
-            );
-
-            await JsRuntime.WaitForNamespaceAsync("Quill", TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(300));
-            await LoadModules();
-            //await JsRuntime.ImportModuleAsync($"https://unpkg.com/quill-html-edit-button@2.2.7/dist/quill.htmlEditButton.min.js{CacheBuster}");
+            await LoadEditorSourcesAsync();
             _sourceLoaded = true;
             await InvokeAsync(StateHasChanged);
 
@@ -374,7 +321,7 @@ public partial class MudExRichTextEdit
             if (EditorContent == null && !string.IsNullOrWhiteSpace(_initialContent))
                 await SetHtml(_initialContent);
         }
-        catch (Microsoft.JSInterop.JSDisconnectedException)
+        catch (JSDisconnectedException)
         {
         }
         catch (ObjectDisposedException)
@@ -387,25 +334,7 @@ public partial class MudExRichTextEdit
         }
     }
 
-    protected virtual async Task LoadModules()
-    {
-        foreach (var quillModule in AllModules)
-        {
-            await Task.WhenAll(
-                JsRuntime.LoadFilesAsync(quillModule.CssFiles.Where(s => !string.IsNullOrEmpty(s)).Select(s => $"{s}{CacheBuster}").ToArray()),
-                JsRuntime.LoadFilesAsync(quillModule.JsFiles.Where(s => !string.IsNullOrEmpty(s)).Select(s => $"{s}{CacheBuster}").ToArray())
-            );
-            var reference = await quillModule.OnLoadedAsync(JsRuntime, this);
-            _jsQuillModuleConfigs.Add(new
-            {
-                JsReference = reference,
-                JsConfigFunction = quillModule.JsConfigFunction,
-                Options = await quillModule.GetQuillJsCreationConfigAsync(JsRuntime, this)
-            });
-        }
-    }
-
-    public override object[] GetJsArguments() => new[] { ElementReference, CreateDotNetObjectReference(), JsOptions() };
+    public override object[] GetJsArguments() => new object[] { ElementReference, CreateDotNetObjectReference(), JsOptions() };
 
     private string StyleStr()
     {
@@ -414,7 +343,7 @@ public partial class MudExRichTextEdit
             .Build();
     }
 
-    private string ClassStr()
+    protected virtual string ClassStr()
     {
         return MudExCssBuilder.Default
             .AddClass("mudex-richtexteditor")
@@ -452,10 +381,9 @@ public partial class MudExRichTextEdit
     }
 
     private async Task StartRecording()
-    {        
+    {
         _recording = await JsReference.InvokeAsync<bool>("startRecording", UseCultureForSpeechRecognition ? Culture?.Name : null);
     }
-    
 
     private async Task StopRecording()
     {
@@ -466,8 +394,6 @@ public partial class MudExRichTextEdit
     [JSInvokable]
     public Task<string> UploadImage(UploadableFile file) => CustomUploadFunc != null ? CustomUploadFunc(file) : Nextended.Core.Types.DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
 
-    [Parameter] public Func<UploadableFile, Task<string>> CustomUploadFunc { get; set; }
-  
     public async Task AttachFilesAsync()
     {
         await OnBeforeDialogOpen.InvokeAsync();
@@ -501,7 +427,7 @@ public partial class MudExRichTextEdit
         };
         var res = await DialogService.ShowComponentInDialogAsync<MudExUploadEdit<UploadableFile>>(TryLocalize("Insert file"), TryLocalize("Select files to insert"),
             uploadEdit =>
-            {                
+            {
                 uploadEdit.MinHeight = 350;
                 uploadEdit.MaxHeight = 350;
                 uploadEdit.LoadFileDataBytesInBackground = false;
@@ -510,7 +436,6 @@ public partial class MudExRichTextEdit
                 uploadEdit.SelectItemsMode = SelectItemsMode.MultiSelect;
                 uploadEdit.DropZoneClickAction = DropZoneClickAction.UploadFile;
                 uploadEdit.UploadRequests = OnGetFilesFunc != null ? OnGetFilesFunc() : Files;
-                //uploadEdit.MimeTypes = mimeTypes;
             }, parameters, options =>
             {
                 options.Animation = AnimationType.Fade;
@@ -535,7 +460,6 @@ public partial class MudExRichTextEdit
         await OnDialogClosed.InvokeAsync();
     }
 
-
     public async Task AttachFilesAsync(IEnumerable<UploadableFile> files)
     {
         foreach (var file in files)
@@ -547,7 +471,7 @@ public partial class MudExRichTextEdit
                 else
                 {
                     await file.EnsureDataLoadedAsync();
-                    file.Url = await DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
+                    file.Url = await Nextended.Core.Types.DataUrl.GetDataUrlAsync(file.Data, file.ContentType);
                 }
             }
 
@@ -560,13 +484,6 @@ public partial class MudExRichTextEdit
     public Task InsertTableAsync(int rows, int columns)
     {
         string tableMarkup = $"<table><tbody>{string.Join("", Enumerable.Range(0, rows).Select(_ => $"<tr>{string.Join("", Enumerable.Range(0, columns).Select(_ => $"<td><p><br></p></td>"))}</tr>"))}</tbody></table>";
-        Console.WriteLine(tableMarkup);
         return InsertHtmlAsync(tableMarkup);
-    }
-
-    public override async ValueTask DisposeAsync()
-    {
-        await Task.WhenAll(AllModules.Select(m => m.DisposeAsync().AsTask()));
-        await base.DisposeAsync();
     }
 }

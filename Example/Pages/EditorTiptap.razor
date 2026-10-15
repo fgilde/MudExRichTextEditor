@@ -1,0 +1,98 @@
+@page "/editor-tiptap"
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Types
+@using MudExRichTextEditor.Extensibility
+
+<PageTitle>Tiptap vs. Quill</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Tiptap vs. Quill</MudText>
+<MudText Typo="Typo.body1" Class="mb-6">
+    Both editors share the same parameters and tools. Edit on the left, the Quill editor mirrors the value. Type @@ for users or # for tags.
+</MudText>
+
+<MudSwitch @bind-Value="_readOnly" Label="ReadOnly" Color="Color.Primary" />
+
+<MudGrid>
+    <MudItem xs="12" md="6">
+        <MudText Typo="Typo.h6">MudExTiptapEdit</MudText>
+        <MudExTiptapEdit @ref="_tiptap" @bind-Value="_content" Height="400" Tools="@_tools" Modules="@_tiptapModules" ReadOnly="@_readOnly" Immediate="true" />
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudText Typo="Typo.h6">MudExRichTextEdit (Quill)</MudText>
+        <MudExRichTextEdit Value="@_content" Height="400" Tools="@_tools" Modules="@_quillModules" ReadOnly="@_readOnly" />
+    </MudItem>
+</MudGrid>
+
+<MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@(async () => _json = await _tiptap.GetContent())">Tiptap GetContent()</MudButton>
+<MudButton Class="mt-4" Variant="Variant.Outlined" OnClick="@ShowMentions">Tiptap mentions</MudButton>
+<MudText Class="mt-2" id="mention-log">@_mentionLog</MudText>
+
+<MudPaper Class="pa-4 mt-4">
+    <MudText Typo="Typo.h6">HTML Output:</MudText>
+    <pre id="html-output" style="max-height: 200px; overflow: auto; white-space: pre-wrap;">@_content</pre>
+    <pre style="max-height: 200px; overflow: auto; white-space: pre-wrap;">@_json</pre>
+</MudPaper>
+
+@code {
+    private MudExTiptapEdit _tiptap;
+    private string _mentionLog;
+    private ITiptapModule[] _tiptapModules;
+    private IQuillModule[] _quillModules;
+
+    protected override void OnInitialized()
+    {
+        _tiptapModules = Mentions<ITiptapModule>();
+        _quillModules = Mentions<IQuillModule>();
+    }
+
+    private record User(string Name, string Email)
+    {
+        public override string ToString() => Name;
+    }
+
+    private record Tag(string Name)
+    {
+        public override string ToString() => Name;
+    }
+
+    private static readonly User[] Users = [new("Florian Gilde", "florian@example.com"), new("Ada Lovelace", "ada@example.com"), new("Alan Turing", "alan@example.com")];
+    private static readonly Tag[] Tags = [new("blazor"), new("tiptap"), new("quill")];
+
+    // Same module class for both editors, but one instance per editor.
+    private TModule[] Mentions<TModule>() =>
+    [
+        (TModule)(object)new MentionModule<User>((_, s) => Task.FromResult(Users.Where(u => u.Name.Contains(s, StringComparison.OrdinalIgnoreCase))), '@')
+        {
+            MentionClicked = u => Log($"clicked {u.Name} <{u.Email}>"),
+            AfterMentionSelect = u => Log($"selected {u.Name}")
+        },
+        (TModule)(object)new MentionModule<Tag>((_, s) => Task.FromResult(Tags.Where(t => t.Name.Contains(s, StringComparison.OrdinalIgnoreCase))), '#')
+    ];
+
+    private Task Log(string message)
+    {
+        _mentionLog = message;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task ShowMentions()
+    {
+        var users = await _tiptap.GetModule<MentionModule<User>>().GetMentionsFromContentAsync();
+        var tags = await _tiptap.GetModule<MentionModule<Tag>>().GetMentionsFromContentAsync();
+        await Log($"users: {string.Join(", ", users.Select(m => m.Data.Email))} | tags: {string.Join(", ", tags.Select(m => m.Data.Name))}");
+    }
+    private bool _readOnly;
+    private string _json;
+    private string _content = "<h2>Hello</h2><p>Some <strong>bold</strong> and <em>italic</em> text.</p><ul><li>one</li><li>two</li></ul><pre><code>code block</code></pre>";
+
+    private QuillTool[] _tools =
+    [
+        QuillTools.Header(group: 1, options: ["", "1", "2", "3"]),
+        QuillTools.Bold(), QuillTools.Italic(), QuillTools.Underline(), QuillTools.Strike(),
+        QuillTools.Color(), QuillTools.Background(),
+        QuillTools.OrderedList(), QuillTools.BulletList(), QuillTools.IndentDecrease(), QuillTools.IndentIncrease(), QuillTools.Align(),
+        QuillTools.Blockquote(), QuillTools.CodeBlock(),
+        QuillTools.Link(), QuillTools.Image(),
+    ];
+}

@@ -1,0 +1,67 @@
+@using MudExRichTextEditor.Types
+
+@* Same ql-* classes as the Quill toolbar: MudExTiptapEdit.js maps them to Tiptap commands, so custom ToolbarContent keeps working. *@
+<div class="tt-toolbar">
+    @foreach (var group in Tools.GroupBy(t => t.Group).OrderBy(g => g.Key))
+    {
+        <span class="tt-group">
+            @foreach (var tool in group)
+            {
+                if (tool is CustomTool custom)
+                {
+                    <button type="button" title="@Editor.TryLocalize(custom.Tooltip(custom, Editor))" @onclick="@(() => custom.OnClick(custom, Editor))">
+                        <MudIcon Size="Size.Small" Color="@(custom.Color(custom, Editor))" Icon="@(custom.Icon(custom, Editor))" />
+                    </button>
+                }
+                else if (tool.Class is "ql-color" or "ql-background")
+                {
+                    <input type="color" class="@tool.Class" title="@Editor.TryLocalize(tool.Class == "ql-color" ? "Text color" : "Background color")" />
+                }
+                else if (SelectLabels.TryGetValue(tool.Class, out var labels) && tool.Options != null)
+                {
+                    <select class="@tool.Class">
+                        @foreach (var option in tool.Options)
+                        {
+                            <option value="@option">@Editor.TryLocalize(labels(option))</option>
+                        }
+                    </select>
+                }
+                else if (Buttons.TryGetValue(string.IsNullOrEmpty(tool.Value) ? tool.Class : $"{tool.Class}:{tool.Value}", out var button))
+                {
+                    <button type="button" class="@tool.Class" value="@tool.Value" title="@Editor.TryLocalize(button.Title)">
+                        <MudIcon Size="Size.Small" Icon="@button.Icon" />
+                    </button>
+                }
+                @* ponytail: tools without a Tiptap mapping (video, font, size, table) are skipped until their extensions are added *@
+            }
+        </span>
+    }
+</div>
+
+@code {
+    [Parameter] public QuillTool[] Tools { get; set; } = [];
+    [Parameter] public IMudExRichTextEdit Editor { get; set; }
+
+    private static readonly Dictionary<string, (string Icon, string Title)> Buttons = new()
+    {
+        ["ql-bold"] = (Icons.Material.Filled.FormatBold, "Bold"),
+        ["ql-italic"] = (Icons.Material.Filled.FormatItalic, "Italic"),
+        ["ql-underline"] = (Icons.Material.Filled.FormatUnderlined, "Underline"),
+        ["ql-strike"] = (Icons.Material.Filled.StrikethroughS, "Strikethrough"),
+        ["ql-list:ordered"] = (Icons.Material.Filled.FormatListNumbered, "Numbered list"),
+        ["ql-list:bullet"] = (Icons.Material.Filled.FormatListBulleted, "Bullet list"),
+        ["ql-indent:-1"] = (Icons.Material.Filled.FormatIndentDecrease, "Decrease indent"),
+        ["ql-indent:+1"] = (Icons.Material.Filled.FormatIndentIncrease, "Increase indent"),
+        ["ql-blockquote"] = (Icons.Material.Filled.FormatQuote, "Quote"),
+        ["ql-code-block"] = (Icons.Material.Filled.Code, "Code block"),
+        ["ql-link"] = (Icons.Material.Filled.Link, "Link"),
+        ["ql-image"] = (Icons.Material.Filled.Image, "Image"),
+        ["ql-clean"] = (Icons.Material.Filled.FormatClear, "Clear formatting"),
+    };
+
+    private static readonly Dictionary<string, Func<string, string>> SelectLabels = new()
+    {
+        ["ql-header"] = o => string.IsNullOrEmpty(o) ? "Normal" : $"Heading {o}",
+        ["ql-align"] = o => string.IsNullOrEmpty(o) ? "Left" : char.ToUpperInvariant(o[0]) + o[1..],
+    };
+}

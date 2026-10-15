@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BlazorJS;
 using Microsoft.JSInterop;
@@ -9,22 +10,26 @@ using Nextended.Core.Extensions;
 
 namespace MudExRichTextEditor.Extensibility;
 
-public class QuillMentionModule<T> : QuillModule
+/// <summary>
+/// Mentions for both editors: pass it to <see cref="MudExRichTextEdit.Modules"/> (Quill) or <see cref="MudExTiptapEdit.Modules"/> (Tiptap).
+/// An instance belongs to one editor, create a new one per editor.
+/// </summary>
+public class MentionModule<T> : QuillModule, ITiptapModule
 {
     private readonly char[] _denotationChars;
     private readonly Func<char, string, Task<IEnumerable<T>>> _getItemsFunc;
-    private DotNetObjectReference<QuillMentionModule<T>> _reference;
+    private DotNetObjectReference<MentionModule<T>> _reference;
 
-    public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char denotationChar, params char[] denotationChars)
+    public MentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char denotationChar, params char[] denotationChars)
     : this(getItemsFunc, new[] { denotationChar }.Concat(denotationChars ?? []).ToArray())
     { }
 
-    public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char[] denotationChars)
+    public MentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char[] denotationChars)
     {
         _denotationChars = denotationChars;
         _getItemsFunc = getItemsFunc;
     }
-    
+
     public Func<T, Task> MentionClicked { get; set; }
     public Func<T, Task> MentionHovered { get; set; }
     public Func<T, Task> BeforeMentionSelect { get; set; }
@@ -40,10 +45,16 @@ public class QuillMentionModule<T> : QuillModule
 
     public override Task<object> GetQuillJsCreationConfigAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor) => Task.FromResult<object>(null);
 
-    protected override async Task<IJSObjectReference> OnModuleLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
+    protected override Task<IJSObjectReference> OnModuleLoadedAsync(IJSRuntime jsRuntime, MudExRichTextEdit editor)
+        => LoadJsAsync(jsRuntime, "quill.mention.module.js", "initializeMentionModule");
+
+    Task<IJSObjectReference> ITiptapModule.OnLoadedAsync(IJSRuntime jsRuntime, MudExTiptapEdit editor)
+        => LoadJsAsync(jsRuntime, "tiptap.mention.module.js", "initializeTiptapMentionModule");
+
+    private async Task<IJSObjectReference> LoadJsAsync(IJSRuntime jsRuntime, string file, string initializer)
     {
         _reference = DotNetObjectReference.Create(this);
-        var res = await jsRuntime.ImportModuleAndCreateJsAsync($"./_content/MudExRichTextEditor/modules/quill.mention.module.js{MudExRichTextEdit.CacheBuster}", "initializeMentionModule", _reference, JsOptions());
+        var res = await jsRuntime.ImportModuleAndCreateJsAsync($"./_content/MudExRichTextEditor/modules/{file}{MudExRichTextEdit.CacheBuster}", initializer, _reference, JsOptions());
         JsReference = res.jsObjectReference;
         ModuleReference = res.moduleReference;
         return JsReference;
@@ -54,7 +65,9 @@ public class QuillMentionModule<T> : QuillModule
         return new
         {
             denotationChars = _denotationChars,
-            type = typeof(T).FullName
+            type = typeof(T).FullName,
+            // Tiptap node name, stable across sessions so saved HTML parses back into mentions.
+            name = $"mention_{Regex.Replace(typeof(T).Name, "[^A-Za-z0-9_]", "_")}"
         };
     }
 
@@ -96,21 +109,41 @@ public class QuillMentionModule<T> : QuillModule
         return AfterMentionSelect?.Invoke(item.Data);
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        if (_reference != null)
-            _reference.Dispose();
-        if (JsReference != null)
+        _reference?.Dispose();
+        try
         {
-            await JsReference.InvokeVoidAsync("dispose");
-            await JsReference.DisposeAsync();
+            if (JsReference != null)
+            {
+                await JsReference.InvokeVoidAsync("dispose");
+                await JsReference.DisposeAsync();
+            }
+            if (ModuleReference != null) await ModuleReference.DisposeAsync();
         }
-        if (ModuleReference != null) await ModuleReference.DisposeAsync();
+        catch (JSDisconnectedException)
+        {
+            // Circuit is gone, nothing left to clean up on the JS side.
+        }
     }
 
     /// <summary>
     /// Returns all mentions from the content
     /// </summary>
-    public Task<Mention<T>[]> GetMentionsFromContentAsync() 
+    public Task<Mention<T>[]> GetMentionsFromContentAsync()
         => JsReference.InvokeAsync<Mention<T>[]>("getMentions").AsTask();
+}
+
+/// <summary>
+/// Previous name of <see cref="MentionModule{T}"/>, kept so existing code compiles unchanged.
+/// </summary>
+public class QuillMentionModule<T> : MentionModule<T>
+{
+    public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char denotationChar, params char[] denotationChars)
+        : base(getItemsFunc, denotationChar, denotationChars)
+    { }
+
+    public QuillMentionModule(Func<char, string, Task<IEnumerable<T>>> getItemsFunc, char[] denotationChars)
+        : base(getItemsFunc, denotationChars)
+    { }
 }
