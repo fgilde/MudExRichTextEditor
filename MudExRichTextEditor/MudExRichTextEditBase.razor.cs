@@ -204,7 +204,8 @@ public abstract partial class MudExRichTextEditBase<T> : IMudExRichTextEdit wher
         id ??= Guid.NewGuid().ToFormattedId();
         if (!_initialized && EditorContent == null && !string.IsNullOrWhiteSpace(Value))
             _initialContent = Value;
-        if (!IsOverwritten(nameof(Tools)))
+        // A wrapper that forwards its own optional Tools parameter passes null explicitly: null means the default tools, an empty array none.
+        if (!IsOverwritten(nameof(Tools)) || Tools is null)
             Tools = GetTools();
         return base.OnInitializedAsync();
     }
